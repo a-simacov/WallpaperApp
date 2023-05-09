@@ -1,9 +1,9 @@
 package com.example.wallpaperapp.screens
 
-import android.graphics.drawable.Icon
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -13,6 +13,7 @@ import androidx.compose.material.Card
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
@@ -22,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -33,53 +35,61 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import com.example.wallpaperapp.R
 import com.example.wallpaperapp.data.Wallpaper
+import com.example.wallpaperapp.navigation.NavigationItem
 
-fun getWallpapers(): List<Wallpaper> {
-
-    return listOf(
-        Wallpaper("name1", ""),
-        Wallpaper("name2", ""),
-        Wallpaper("name3", ""),
-        Wallpaper("name4", ""),
-        Wallpaper("name5", ""),
-    )
-
-}
+lateinit var viewModel: HomeScreenViewModel
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navController: NavHostController) {
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colorResource(id = R.color.white))
-            .wrapContentSize(Alignment.Center)
-    ) {
-        Header()
-        //AddWallpaperButton()
-        SearchTextField()
-        WallpapersLazyGrid()
+    viewModel = ViewModelProvider(
+        LocalContext.current as ViewModelStoreOwner
+    ).get(HomeScreenViewModel::class.java)
+
+    Scaffold(
+        floatingActionButton = {
+            AddWallpaperButton(navController)
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(colorResource(id = R.color.white))
+        ) {
+            Header()
+            SearchTextField()
+            WallpapersLazyGrid(navController)
+        }
     }
 
-}
-
-@Composable
-fun AddWallpaperButton() {
-    FloatingActionButton(
-        onClick = { /*TODO*/ },
-        backgroundColor = colorResource(id = R.color.main_theme),
-        contentColor = Color.White
-    ) {
-        Icon(Icons.Filled.Add, contentDescription = "add")
-    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen()
+    HomeScreen(rememberNavController())
+}
+
+@Composable
+fun AddWallpaperButton(navController: NavHostController?) {
+    FloatingActionButton(
+        onClick = {
+            navController?.navigate(NavigationItem.NewWallpaper.route)
+        },
+        backgroundColor = colorResource(id = R.color.main_theme),
+        contentColor = Color.White
+    ) {
+        Icon(Icons.Filled.Add, contentDescription = "add")
+    }
 }
 
 @Composable
@@ -138,9 +148,9 @@ fun SearchTextField() {
 }
 
 @Composable
-fun WallpapersLazyGrid() {
+fun WallpapersLazyGrid(navController: NavHostController) {
 
-    val wallpapers = getWallpapers()
+    val wallpapers by viewModel.wallpapers.collectAsState()
 
     LazyVerticalGrid(
         modifier = Modifier.padding(horizontal = 16.dp),
@@ -149,35 +159,42 @@ fun WallpapersLazyGrid() {
         columns = GridCells.Adaptive(minSize = 157.dp)
     ) {
         items(items = wallpapers) { wallpaper ->
-            WallpaperItem(wallpaper)
+            WallpaperItem(wallpaper, navController)
         }
     }
 
 }
 
-@Preview(showBackground = true)
+//@Preview(showBackground = true)
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun WallpaperItem(@PreviewParameter(SampleWallpaperProvider::class) wallpaper: Wallpaper) {
+fun WallpaperItem(
+    @PreviewParameter(SampleWallpaperProvider::class) wallpaper: Wallpaper,
+    navController: NavHostController
+) {
 
     Card(
         modifier = Modifier
             .width(157.dp)
-            .height(279.dp),
+            .height(279.dp)
+            .clickable {
+                navController.navigate(
+                    route = NavigationItem.Wallpaper.passUrl(wallpaper.imgUrl)
+                )
+            },
         shape = RoundedCornerShape(12.dp),
         elevation = 7.dp,
-
-        ) {
-        // AsyncImage
-        Image(
+    ) {
+        GlideImage(
             modifier = Modifier.fillMaxSize(),
-            painter = painterResource(id = R.drawable.wallpaper_icon),
+            model = wallpaper.imgUrl,
             contentDescription = "image",
             contentScale = ContentScale.FillWidth,
         )
         Column(
             modifier = Modifier.padding(top = 8.dp, end = 8.dp),
             verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.End
+            horizontalAlignment = Alignment.End,
         ) {
             Image(
                 modifier = Modifier

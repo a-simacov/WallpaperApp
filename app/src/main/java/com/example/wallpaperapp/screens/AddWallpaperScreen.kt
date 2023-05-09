@@ -27,18 +27,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.wallpaperapp.R
 
+
 @Preview
 @Composable
 fun AddWallpaperScreen() {
     var textState by remember { mutableStateOf("") }
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .background(color = colorResource(id = R.color.main_theme)),
         verticalArrangement = Arrangement.Center
     ) {
         Card(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 25.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 25.dp),
             shape = RoundedCornerShape(10.dp)
         ) {
             Column(
@@ -55,10 +59,13 @@ fun AddWallpaperScreen() {
                 OutlinedTextField(
                     value = textState,
                     onValueChange = { textState = it },
+                    singleLine = true
                 )
                 Button(
-                    onClick = { /*TODO*/ },
-                    modifier = Modifier.width(150.dp).padding(vertical = 20.dp),
+                    onClick = { },
+                    modifier = Modifier
+                        .width(150.dp)
+                        .padding(vertical = 20.dp),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = colorResource(id = R.color.main_theme),
                         contentColor = colorResource(id = R.color.white),

@@ -2,8 +2,11 @@ package com.example.wallpaperapp.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.example.wallpaperapp.screens.AddWallpaperScreen
 import com.example.wallpaperapp.screens.DownloadsScreen
 import com.example.wallpaperapp.screens.FavouritesScreen
 import com.example.wallpaperapp.screens.HomeScreen
@@ -14,7 +17,7 @@ fun Navigation(navController: NavHostController) {
 
     NavHost(navController = navController, startDestination = NavigationItem.Home.route) {
         composable(NavigationItem.Home.route) {
-            HomeScreen()
+            HomeScreen(navController)
         }
         composable(NavigationItem.Favourites.route) {
             FavouritesScreen()
@@ -22,8 +25,19 @@ fun Navigation(navController: NavHostController) {
         composable(NavigationItem.Downloads.route) {
             DownloadsScreen()
         }
-        composable(NavigationItem.Wallpaper.route) {
-            WallpaperScreen()
+        composable(
+            route = NavigationItem.Wallpaper.route,
+            arguments = listOf(
+                navArgument(IMG_URL_KEY) {
+                    type = NavType.StringType
+                    defaultValue = ""
+                }
+            )
+        ) {
+            WallpaperScreen(it.arguments?.getString(IMG_URL_KEY)!!.toString())
+        }
+        composable(NavigationItem.NewWallpaper.route) {
+            AddWallpaperScreen()
         }
     }
 

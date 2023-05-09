@@ -17,20 +17,23 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import com.example.wallpaperapp.R
 
-@Preview
+//@Preview
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun WallpaperScreen() {
+fun WallpaperScreen(url: String) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.wallpaper_icon),
-            contentDescription = "wallpaper",
+        GlideImage(
             modifier = Modifier.fillMaxSize().weight(1f),
-            contentScale = ContentScale.Fit
+            model = url,
+            contentDescription = "wallpaper",
+            contentScale = ContentScale.Fit,
         )
         Button(
             modifier = Modifier.fillMaxWidth().height(64.dp),
