@@ -1,36 +1,36 @@
 package com.example.wallpaperapp.screens
 
-import android.app.Application
-import android.widget.Toast
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.wallpaperapp.data.Wallpaper
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-class HomeScreenViewModel(application: Application) : AndroidViewModel(application) {
+class HomeScreenViewModel : ViewModel() {
 
-    private val pWallpapers = MutableStateFlow(mutableListOf<Wallpaper>())
-    val wallpapers: StateFlow<MutableList<Wallpaper>>
-        get() = pWallpapers
+    private var pWallpapers = MutableStateFlow(mutableListOf<Wallpaper>())
+    val wallpapers: StateFlow<MutableList<Wallpaper>> = pWallpapers.asStateFlow()
 
     init {
         viewModelScope.launch {
             try {
                 val reference = Firebase.storage.reference
                 val images = reference.child("wallpapers/").listAll().await()
+                val list = mutableListOf<Wallpaper>()
                 images.items.forEach {
                     val url = it.downloadUrl.await().toString()
-                    pWallpapers.value.add(
+                    list.add(
                         Wallpaper(it.name, url)
                     )
                 }
+                pWallpapers.value.addAll(list)
             } catch (e: Exception) {
-                Toast.makeText(application.applicationContext, e.message, Toast.LENGTH_LONG).show()
+                //Toast.makeText(application.applicationContext, e.message, Toast.LENGTH_LONG).show()
             }
         }
     }

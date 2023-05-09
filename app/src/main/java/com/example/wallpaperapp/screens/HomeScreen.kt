@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -45,14 +46,13 @@ import com.example.wallpaperapp.R
 import com.example.wallpaperapp.data.Wallpaper
 import com.example.wallpaperapp.navigation.NavigationItem
 
-lateinit var viewModel: HomeScreenViewModel
-
 @Composable
-fun HomeScreen(navController: NavHostController) {
+fun HomeScreen(
+    navController: NavHostController,
+    homeScreenViewModel: HomeScreenViewModel = viewModel()
+) {
 
-    viewModel = ViewModelProvider(
-        LocalContext.current as ViewModelStoreOwner
-    ).get(HomeScreenViewModel::class.java)
+    val wallpapers by homeScreenViewModel.wallpapers.collectAsState()
 
     Scaffold(
         floatingActionButton = {
@@ -67,7 +67,7 @@ fun HomeScreen(navController: NavHostController) {
         ) {
             Header()
             SearchTextField()
-            WallpapersLazyGrid(navController)
+            WallpapersLazyGrid(navController, wallpapers)
         }
     }
 
@@ -148,9 +148,10 @@ fun SearchTextField() {
 }
 
 @Composable
-fun WallpapersLazyGrid(navController: NavHostController) {
-
-    val wallpapers by viewModel.wallpapers.collectAsState()
+fun WallpapersLazyGrid(
+    navController: NavHostController,
+    wallpapers: MutableList<Wallpaper>
+) {
 
     LazyVerticalGrid(
         modifier = Modifier.padding(horizontal = 16.dp),
@@ -158,7 +159,10 @@ fun WallpapersLazyGrid(navController: NavHostController) {
         horizontalArrangement = Arrangement.spacedBy(14.dp),
         columns = GridCells.Adaptive(minSize = 157.dp)
     ) {
-        items(items = wallpapers) { wallpaper ->
+        items(
+            items = wallpapers,
+            key = { item -> item.imgUrl }
+        ) { wallpaper ->
             WallpaperItem(wallpaper, navController)
         }
     }
