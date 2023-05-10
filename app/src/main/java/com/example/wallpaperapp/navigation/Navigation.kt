@@ -34,10 +34,10 @@ fun Navigation(navController: NavHostController) {
                 }
             )
         ) {
-            WallpaperScreen(it.arguments?.getString(IMG_URL_KEY)!!.toString())
+            WallpaperScreen(navController, it.arguments?.getString(IMG_URL_KEY)!!.toString())
         }
         composable(NavigationItem.NewWallpaper.route) {
-            AddWallpaperScreen()
+            AddWallpaperScreen(navController)
         }
     }
 
