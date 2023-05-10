@@ -1,6 +1,6 @@
 package com.example.wallpaperapp.screens
 
-import androidx.compose.foundation.Image
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,27 +11,40 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
-import com.bumptech.glide.integration.compose.GlideImage
 import com.example.wallpaperapp.R
+import java.net.URLDecoder
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 
 //@Preview
-@OptIn(ExperimentalGlideComposeApi::class)
+//@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun WallpaperScreen(url: String) {
+
+    Log.d("GLIDE-SCREEN", URLDecoder.decode(url, "UTF-8"))
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
     ) {
-        GlideImage(
+//        GlideImage(
+//            model = URLDecoder.decode(url, "UTF-8"),
+//            modifier = Modifier.fillMaxSize().weight(1f),
+//            contentDescription = "wallpaper",
+//            contentScale = ContentScale.Fit,
+//        )
+        AsyncImage(
+            //model = URLDecoder.decode(url, "UTF-8"),
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(URLDecoder.decode(url, "UTF-8"))
+                .crossfade(true)
+                .build(),
             modifier = Modifier.fillMaxSize().weight(1f),
-            model = url,
             contentDescription = "wallpaper",
             contentScale = ContentScale.Fit,
         )
@@ -46,4 +59,5 @@ fun WallpaperScreen(url: String) {
             )
         }
     }
+
 }

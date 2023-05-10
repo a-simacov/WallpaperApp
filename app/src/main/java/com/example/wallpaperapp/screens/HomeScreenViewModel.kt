@@ -8,6 +8,7 @@ import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -28,7 +29,7 @@ class HomeScreenViewModel : ViewModel() {
                         Wallpaper(it.name, url)
                     )
                 }
-                pWallpapers.value.addAll(list)
+                pWallpapers.update { list }
             } catch (e: Exception) {
                 //Toast.makeText(application.applicationContext, e.message, Toast.LENGTH_LONG).show()
             }
