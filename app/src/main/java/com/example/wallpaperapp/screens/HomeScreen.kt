@@ -148,7 +148,7 @@ fun SearchTextField() {
 @Composable
 fun WallpapersLazyGrid(
     navController: NavHostController,
-    wallpapers: MutableList<Wallpaper>
+    wallpapers: List<Wallpaper>
 ) {
 
     LazyVerticalGrid(
@@ -229,6 +229,6 @@ fun WallpaperItem(
 
 class SampleWallpaperProvider : PreviewParameterProvider<Wallpaper> {
     override val values = sequenceOf(
-        Wallpaper(name = "Toroni", imgUrl = "")
+        Wallpaper(name = "Toroni", imgUrl = "", id = "")
     )
 }
