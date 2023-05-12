@@ -20,10 +20,10 @@ fun Navigation(navController: NavHostController) {
             HomeScreen(navController)
         }
         composable(NavigationItem.Favourites.route) {
-            FavouritesScreen()
+            FavouritesScreen(navController)
         }
         composable(NavigationItem.Downloads.route) {
-            DownloadsScreen()
+            DownloadsScreen(navController)
         }
         composable(
             route = NavigationItem.Wallpaper.route,

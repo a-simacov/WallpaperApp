@@ -1,4 +1,4 @@
-package com.example.wallpaperapp.screens
+package com.example.wallpaperapp.screens.common
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class HomeScreenViewModel : ViewModel() {
+class WallpapersScreenVM : ViewModel() {
 
     private var pWallpapers = MutableStateFlow(listOf<Wallpaper>())
     val wallpapers: StateFlow<List<Wallpaper>> = pWallpapers.asStateFlow()
