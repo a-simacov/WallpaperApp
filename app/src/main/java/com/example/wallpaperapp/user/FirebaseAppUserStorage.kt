@@ -11,10 +11,16 @@ class FirebaseAppUserStorage(private val context: Context) {
 
     private val auth = Firebase.auth
 
-    fun getUser(): User? {
+    suspend fun getUser(): User {
+        if (auth.currentUser == null)
+            try {
+                auth.signInAnonymously().await()
+            } catch (e: Exception) {
+                sendLocalBroadcastError(context, Constants.LACTION_REPO_ERROR, e.message!!)
+            }
         return auth.currentUser?.let {
-            User(name = it.email ?: "", isAuth = true)
-        }
+            User(id = it.uid, name = it.email ?: "", isAuth = !it.isAnonymous)
+        } ?: User()
     }
 
     suspend fun signUp(email: String, pass: String) {
