@@ -26,7 +26,7 @@ fun Navigation(navController: NavHostController) {
             DownloadsScreen(navController)
         }
         composable(
-            route = NavigationItem.Wallpaper.route,
+            route = NavigationItem.SingleWallpaper.route,
             arguments = listOf(
                 navArgument(IMG_URL_KEY) {
                     type = NavType.StringType

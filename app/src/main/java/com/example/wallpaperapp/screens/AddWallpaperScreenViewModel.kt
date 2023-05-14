@@ -4,6 +4,9 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.wallpaperapp.data.Wallpaper
+import com.example.wallpaperapp.data.WallpaperRepository
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,13 +18,13 @@ class AddWallpaperScreenViewModel : AndroidViewModel(Application()) {
     private var pOpExecuted = MutableStateFlow(false)
     val opExecuted: StateFlow<Boolean> = pOpExecuted.asStateFlow()
 
-//    lateinit var wallpaperRepo: WallpaperRepository
+    lateinit var wallpaperRepo: WallpaperRepository
 
     fun saveImage(wallpaper: Wallpaper) {
         viewModelScope.launch {
-            //wallpaper.id = Firebase.auth.currentUser?.uid ?: ""
-//            wallpaperRepo = WallpaperRepository()
-//            wallpaperRepo.add(wallpaper)
+            wallpaper.id = Firebase.auth.currentUser?.uid ?: ""
+            wallpaperRepo = WallpaperRepository()
+            wallpaperRepo.add(wallpaper)
             pOpExecuted.update { true }
         }
     }

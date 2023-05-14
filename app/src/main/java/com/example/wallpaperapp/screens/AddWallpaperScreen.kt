@@ -35,6 +35,7 @@ import androidx.navigation.NavHostController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.wallpaperapp.R
+import com.example.wallpaperapp.data.Wallpaper
 import com.example.wallpaperapp.navigation.NavigationItem
 
 @Composable
@@ -70,8 +71,8 @@ fun AddWallpaperScreen(
                 onImgChoose = { selectImageLauncher.launch("image/*") },
                 onContinueBtnClick = {
                     inProcess = true
-//                    val newWallpaper = Wallpaper(name = imgNameState, imgLocalUri = imgUriState!!)
-//                    vm.saveImage(newWallpaper)
+                    val newWallpaper = Wallpaper(name = imgNameState, imgLocalUri = imgUriState!!)
+                    vm.saveImage(newWallpaper)
                 }
             )
     }
