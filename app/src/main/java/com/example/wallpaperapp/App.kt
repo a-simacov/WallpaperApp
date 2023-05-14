@@ -36,12 +36,8 @@ class App : Application() {
         }
     }
 
-    fun getUser() = appUser
-
     fun setUser(user: User) {
         appUser = user
     }
-
-    fun getUserRepo(): UserRepository = userRepository
 
 }

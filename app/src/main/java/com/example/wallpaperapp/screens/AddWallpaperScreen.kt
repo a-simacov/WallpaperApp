@@ -70,7 +70,8 @@ fun AddWallpaperScreen(
                 onImgChoose = { selectImageLauncher.launch("image/*") },
                 onContinueBtnClick = {
                     inProcess = true
-                    vm.saveImage(imgNameState, imgUriState!!)
+//                    val newWallpaper = Wallpaper(name = imgNameState, imgLocalUri = imgUriState!!)
+//                    vm.saveImage(newWallpaper)
                 }
             )
     }
