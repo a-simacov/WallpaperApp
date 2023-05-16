@@ -1,6 +1,7 @@
 package com.example.wallpaperapp.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,7 +26,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -49,6 +49,7 @@ fun WallpaperScreen(
         navController.popBackStack(NavigationItem.Home.route, inclusive = false)
 
     var inProcess by remember { mutableStateOf(false) }
+    var isFav by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -58,20 +59,19 @@ fun WallpaperScreen(
             ShowProgress("Setting wallpaper...")
         else
             SetWallpaper(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
                 url = url,
                 onClick = {
                     inProcess = true
                     wallpaperScreenVM.setSystemWallpaper(context = context, url = url)
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
             )
     }
 
 }
 
-@Preview
 @Composable
 fun ShowProgress(progressText: String = "Processing...") {
     Row(
@@ -92,18 +92,24 @@ fun ShowProgress(progressText: String = "Processing...") {
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun SetWallpaper(
+    modifier: Modifier = Modifier,
     url: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    onClick: () -> Unit
 ) {
-    GlideImage(
-        model = url,
-        modifier = modifier,
-        contentDescription = "wallpaper",
-        contentScale = ContentScale.FillHeight,
-    )
+    Box(
+        modifier = modifier
+    ) {
+        GlideImage(
+            model = url,
+            modifier = Modifier.fillMaxSize(),
+            contentDescription = "wallpaper",
+            contentScale = ContentScale.FillHeight,
+        )
+    }
     Button(
-        modifier = Modifier.fillMaxWidth().height(64.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(64.dp),
         onClick = onClick
     ) {
         Text(

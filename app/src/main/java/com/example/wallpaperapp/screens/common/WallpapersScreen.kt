@@ -51,7 +51,11 @@ fun WallpapersCommonScreen(
     val wallpapers by vm.wallpapers.collectAsState()
     val onClickAddBtn = { navController.navigate(NavigationItem.NewWallpaper.route) }
     val onClickWallPaper: (wallpaper: Wallpaper) -> Unit = {
-        navController.navigate(route = NavigationItem.Wallpaper.passUrl(it.imgUrl))
+        navController.navigate(route = NavigationItem.SingleWallpaper.passUrl(it))
+    }
+    val onSetFav: (wallpaper: Wallpaper) -> Unit = {
+        it.isFavourite = !it.isFavourite
+        vm.changeFav(it)
     }
 
     Scaffold(
@@ -68,17 +72,11 @@ fun WallpapersCommonScreen(
         ) {
             Header(headerText)
             SearchTextField()
-            WallpapersLazyGrid(wallpapers, onClickWallPaper)
+            WallpapersLazyGrid(wallpapers, onClickWallPaper, onSetFav)
         }
     }
 
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun HomeScreenPreview() {
-//    HomeScreen(rememberNavController())
-//}
 
 @Composable
 fun AddWallpaperButton(onClickAddBtn: () -> Unit, modifier: Modifier = Modifier) {
@@ -150,7 +148,8 @@ fun SearchTextField() {
 @Composable
 fun WallpapersLazyGrid(
     wallpapers: List<Wallpaper>,
-    onClickWallpaper: (Wallpaper) -> Unit
+    onClickWallpaper: (Wallpaper) -> Unit,
+    onSetFav: (Wallpaper) -> Unit
 ) {
 
     LazyVerticalGrid(
@@ -161,9 +160,9 @@ fun WallpapersLazyGrid(
     ) {
         items(
             items = wallpapers,
-            key = { item -> item.imgUrl }
+            key = { item -> item.id }
         ) { wallpaper ->
-            WallpaperItem(wallpaper, onClickWallpaper)
+            WallpaperItem(wallpaper, onClickWallpaper, onSetFav)
         }
     }
 
@@ -174,7 +173,8 @@ fun WallpapersLazyGrid(
 @Composable
 fun WallpaperItem(
     @PreviewParameter(SampleWallpaperProvider::class) wallpaper: Wallpaper,
-    onClickWallpaper: (Wallpaper) -> Unit
+    onClickWallpaper: (Wallpaper) -> Unit,
+    onSetFav: (Wallpaper) -> Unit
 ) {
 
     Card(
@@ -196,18 +196,18 @@ fun WallpaperItem(
             horizontalAlignment = Alignment.End,
         ) {
             Image(
-                modifier = Modifier.size(16.dp, 16.dp),
+                modifier = Modifier.size(64.dp).clickable {
+                    onSetFav(wallpaper)
+                },
                 painter = painterResource(
                     id = if (wallpaper.isFavourite) R.drawable.heart_checked else R.drawable.heart_unchecked
                 ),
                 contentDescription = "fav",
-                contentScale = ContentScale.Inside,
+                contentScale = ContentScale.Fit,
             )
         }
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
