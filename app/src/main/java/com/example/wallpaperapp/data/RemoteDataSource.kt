@@ -27,13 +27,34 @@ class RemoteDataSource {
     // Will not attempt reconnect. Reason: Database lives in a different region.
     // Please change your database URL to https://wallpaperapp-d3bc3-default-rtdb.europe-west1.firebasedatabase.app
 
-    fun updateWallpapers(wallpapers: MutableStateFlow<List<Wallpaper>>) {
+    fun updateWallpapers(wallpapers: MutableStateFlow<List<Wallpaper>>, userId: String) {
         database.getReference("wallpapers").addValueEventListener(
             object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     if (dataSnapshot.exists()) {
                         wallpapers.update {
                             dataSnapshot.getValue<HashMap<String, Wallpaper>>()!!.values.toList()
+                        }
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.w("RTDB ERROR", "Failed to read value.", error.toException())
+                }
+            }
+        )
+
+        database.getReference("favourites/$userId").addValueEventListener(
+            object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        val favs = dataSnapshot.getValue<HashMap<String, Wallpaper>>()!!.values.toList()
+                        wallpapers.update {
+                            it.also { wps ->
+                                favs.forEach { fav ->
+                                    wps.find { it.id == fav.id }?.isFavourite = true
+                                }
+                            }
                         }
                     }
                 }
@@ -57,10 +78,16 @@ class RemoteDataSource {
     suspend fun deleteFromFav(wallpaper: Wallpaper, userId: String) {
         try {
             val dbRef = database.getReference("favourites")
-            val query = dbRef.child(userId).orderByChild("id").equalTo(wallpaper.id)
-            val found = query.get().await()
-            if (found.exists())
-                found.ref.removeValue().await()
+            val res = dbRef.child(userId).child("").get().await()
+            val list = res.children.toList()
+            for (item in list) {
+                if (item.exists()) {
+                    if (wallpaper.id == item.child("id").value) {
+                        item.ref.removeValue()
+                        break
+                    }
+                }
+            }
         } catch (e: Exception) {
             Log.d(tag, "Error setValue: ${e.message!!}")
         }
@@ -75,7 +102,7 @@ class RemoteDataSource {
             wallpaper.imgUrl = getDownloadUrl(fileRef)
             wallpaper.id = uid
 
-            saveImage( wallpaper )
+            writeWallpaper(wallpaper)
         } catch (e: Exception) {
             //Toast.makeText(application.applicationContext, e.message, Toast.LENGTH_LONG).show()
         }
@@ -98,7 +125,7 @@ class RemoteDataSource {
         }
     }
 
-    private fun saveImage(wallpaper: Wallpaper) {
+    private fun writeWallpaper(wallpaper: Wallpaper) {
         try {
             val dbRef = database.getReference("wallpapers")
             dbRef.child(wallpaper.id).setValue(wallpaper)

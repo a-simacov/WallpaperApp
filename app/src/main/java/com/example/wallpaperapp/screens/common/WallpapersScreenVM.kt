@@ -17,21 +17,19 @@ class WallpapersScreenVM : ViewModel() {
     val wallpapers: StateFlow<List<Wallpaper>> = pWallpapers.asStateFlow()
 
     private val wallpapersRepo = WallpaperRepository()
+    private val userId = Firebase.auth.currentUser?.uid ?: ""
 
     init {
         updateWallpapers()
     }
 
     private fun updateWallpapers() {
-        wallpapersRepo.update(pWallpapers)
+        wallpapersRepo.update(pWallpapers, userId)
     }
 
     fun changeFav(wallpaper: Wallpaper) {
         viewModelScope.launch {
-            wallpapersRepo.changeFavourite(
-                wallpaper,
-                userId = Firebase.auth.currentUser?.uid ?: ""
-            )
+            wallpapersRepo.changeFavourite(wallpaper, userId)
         }
     }
 

@@ -7,8 +7,8 @@ class WallpaperRepository() {
 
     private val remoteDataSource = RemoteDataSource()
 
-    fun update(wallpapers: MutableStateFlow<List<Wallpaper>>) {
-        remoteDataSource.updateWallpapers(wallpapers)
+    fun update(wallpapers: MutableStateFlow<List<Wallpaper>>, userId: String) {
+        remoteDataSource.updateWallpapers(wallpapers, userId)
     }
 
     suspend fun add(wallpaper: Wallpaper, imgLocalUri: Uri) {
