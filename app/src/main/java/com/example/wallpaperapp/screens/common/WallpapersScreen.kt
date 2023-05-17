@@ -54,7 +54,7 @@ fun WallpapersCommonScreen(
         navController.navigate(route = NavigationItem.SingleWallpaper.passUrl(it))
     }
     val onSetFav: (wallpaper: Wallpaper) -> Unit = {
-        it.isFavourite = !it.isFavourite
+        it.isFavourite.value = !it.isFavourite.value
         vm.changeFav(it)
     }
 
@@ -200,7 +200,7 @@ fun WallpaperItem(
                     onSetFav(wallpaper)
                 },
                 painter = painterResource(
-                    id = if (wallpaper.isFavourite) R.drawable.heart_checked else R.drawable.heart_unchecked
+                    id = if (wallpaper.isFavourite.value) R.drawable.heart_checked else R.drawable.heart_unchecked
                 ),
                 contentDescription = "fav",
                 contentScale = ContentScale.Fit,

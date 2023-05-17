@@ -48,11 +48,12 @@ class RemoteDataSource {
             object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     if (dataSnapshot.exists()) {
-                        val favs = dataSnapshot.getValue<HashMap<String, Wallpaper>>()!!.values.toList()
+                        val favs =
+                            dataSnapshot.getValue<HashMap<String, String>>()!!.values.toList()
                         wallpapers.update {
                             it.also { wps ->
                                 favs.forEach { fav ->
-                                    wps.find { it.id == fav.id }?.isFavourite = true
+                                    wps.find { it.id == fav }?.isFavourite?.value = true
                                 }
                             }
                         }
@@ -69,7 +70,7 @@ class RemoteDataSource {
     suspend fun addToFav(wallpaper: Wallpaper, userId: String) {
         try {
             val dbRef = database.getReference("favourites")
-            dbRef.child(userId).push().setValue(wallpaper).await()
+            dbRef.child(userId).push().setValue(wallpaper.id).await()
         } catch (e: Exception) {
             Log.d(tag, "Error setValue: ${e.message!!}")
         }
@@ -128,7 +129,14 @@ class RemoteDataSource {
     private fun writeWallpaper(wallpaper: Wallpaper) {
         try {
             val dbRef = database.getReference("wallpapers")
-            dbRef.child(wallpaper.id).setValue(wallpaper)
+            dbRef.child(wallpaper.id).setValue(
+                object {
+                    val id = wallpaper.id
+                    val name = wallpaper.name
+                    val imgUrl = wallpaper.imgUrl
+                    val authorId = wallpaper.authorId
+                }
+            )
         } catch (e: Exception) {
             Log.d(tag, "Error setValue: ${e.message!!}")
         }

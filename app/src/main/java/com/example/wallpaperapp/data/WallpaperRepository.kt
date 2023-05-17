@@ -16,7 +16,7 @@ class WallpaperRepository() {
     }
 
     suspend fun changeFavourite(wallpaper: Wallpaper, userId: String) {
-        if (wallpaper.isFavourite) {
+        if (wallpaper.isFavourite.value) {
             remoteDataSource.addToFav(wallpaper, userId)
         } else {
             remoteDataSource.deleteFromFav(wallpaper, userId)

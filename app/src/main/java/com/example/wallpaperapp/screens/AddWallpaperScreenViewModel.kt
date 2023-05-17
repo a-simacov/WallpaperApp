@@ -18,7 +18,7 @@ class AddWallpaperScreenViewModel : ViewModel() {
     private var pOpExecuted = MutableStateFlow(false)
     val opExecuted: StateFlow<Boolean> = pOpExecuted.asStateFlow()
 
-    val wallpaperRepo = WallpaperRepository()
+    private val wallpaperRepo = WallpaperRepository()
 
     fun saveImage(imgNameState: String, imgLocalUri: Uri) {
         viewModelScope.launch {
