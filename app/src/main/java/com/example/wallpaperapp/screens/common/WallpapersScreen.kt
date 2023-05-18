@@ -39,6 +39,7 @@ import com.bumptech.glide.integration.compose.GlideImage
 import com.example.wallpaperapp.R
 import com.example.wallpaperapp.data.Wallpaper
 import com.example.wallpaperapp.navigation.NavigationItem
+import com.example.wallpaperapp.screens.ShowProgress
 
 @Composable
 fun WallpapersCommonScreen(
@@ -72,7 +73,10 @@ fun WallpapersCommonScreen(
         ) {
             Header(headerText)
             SearchTextField()
-            WallpapersLazyGrid(wallpapers, onClickWallPaper, onSetFav)
+            if (wallpapers.isEmpty())
+                ShowProgress(progressColor = colorResource(id = R.color.main_theme))
+            else
+                WallpapersLazyGrid(wallpapers, onClickWallPaper, onSetFav)
         }
     }
 
@@ -189,7 +193,12 @@ fun WallpaperItem(
             model = wallpaper.imgUrl,
             contentDescription = "image",
             contentScale = ContentScale.FillWidth,
-        )
+        ) {
+            it
+                .error(R.drawable.ic_launcher_background)
+                .placeholder(R.drawable.wallpaper_icon)
+                .load(wallpaper.imgUrl)
+        }
         Column(
             modifier = Modifier.padding(top = 8.dp, end = 8.dp),
             verticalArrangement = Arrangement.Top,

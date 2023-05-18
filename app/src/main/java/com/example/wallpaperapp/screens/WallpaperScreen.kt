@@ -49,7 +49,6 @@ fun WallpaperScreen(
         navController.popBackStack(NavigationItem.Home.route, inclusive = false)
 
     var inProcess by remember { mutableStateOf(false) }
-    var isFav by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -73,7 +72,7 @@ fun WallpaperScreen(
 }
 
 @Composable
-fun ShowProgress(progressText: String = "Processing...") {
+fun ShowProgress(progressText: String = "Processing...", progressColor: Color = Color.White) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
@@ -81,7 +80,7 @@ fun ShowProgress(progressText: String = "Processing...") {
     ) {
         CircularProgressIndicator(
             modifier = Modifier.size(size = 64.dp),
-            color = Color.White,
+            color = progressColor,
             strokeWidth = 5.dp
         )
         Spacer(modifier = Modifier.width(width = 8.dp))
