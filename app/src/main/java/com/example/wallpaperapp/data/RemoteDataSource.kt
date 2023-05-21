@@ -10,8 +10,11 @@ import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
 
@@ -27,16 +30,26 @@ class RemoteDataSource {
     // Will not attempt reconnect. Reason: Database lives in a different region.
     // Please change your database URL to https://wallpaperapp-d3bc3-default-rtdb.europe-west1.firebasedatabase.app
 
-    fun updateWallpapers(wallpapers: MutableStateFlow<List<Wallpaper>>, userId: String, dbName: String) {
+    fun updateWallpapers(
+        wallpapers: MutableStateFlow<List<Wallpaper>>,
+        userId: String,
+        sourceName: String
+    ) {
 
-        initWallPaperListener(wallpapers, userId)
-//        initFavsListener(wallpapers, userId)
+        when (sourceName) {
+            "HOME" -> initWallpapersListener(wallpapers, userId)
+            "FAVOURITES" -> initFavsFilteredListener(wallpapers, userId)
+            "DOWNLOADS" -> TODO("NOT IMPLEMENTED, AWAITING ROOM DB")
+        }
 
     }
 
-    private fun initWallPaperListener(wallpapers: MutableStateFlow<List<Wallpaper>>, userId: String) {
+    private fun initWallpapersListener(
+        wallpapers: MutableStateFlow<List<Wallpaper>>,
+        userId: String
+    ) {
 
-            database.getReference("wallpapers").addValueEventListener(
+        database.getReference("wallpapers").addValueEventListener(
             object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     if (dataSnapshot.exists()) {
@@ -59,14 +72,11 @@ class RemoteDataSource {
         database.getReference("favourites/$userId").addValueEventListener(
             object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    if (dataSnapshot.exists()) {
-                        val favs =
-                            dataSnapshot.getValue<HashMap<String, String>>()!!.values.toList()
-                        wallpapers.update {
-                            it.also { wps ->
-                                favs.forEach { fav ->
-                                    wps.find { it.id == fav }?.isFavourite?.value = true
-                                }
+                    val favs = getFavouriteIds(dataSnapshot)
+                    wallpapers.update { list ->
+                        list.also {
+                            it.forEach { wallpaper ->
+                                wallpaper.isFavourite.value = (wallpaper.id in favs)
                             }
                         }
                     }
@@ -77,6 +87,39 @@ class RemoteDataSource {
                 }
             }
         )
+    }
+
+    private fun initFavsFilteredListener(wallpapers: MutableStateFlow<List<Wallpaper>>, userId: String) {
+        database.getReference("favourites/$userId").addValueEventListener(
+            object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val favs = getFavouriteIds(dataSnapshot)
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val dbRef = database.getReference("wallpapers")
+                        val list = mutableListOf<Wallpaper>()
+                        for (fav in favs) {
+                            val res = dbRef.child(fav).get().await().getValue<Wallpaper>()
+                            res?.also {
+                                res.isFavourite.value = true
+                                list.add(it)
+                            }
+                        }
+                        wallpapers.update { list }
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.d("RTDB ERROR", "Failed to read value.", error.toException())
+                }
+            }
+        )
+    }
+
+    private fun getFavouriteIds(dataSnapshot: DataSnapshot): List<String> {
+        return if (dataSnapshot.exists())
+            dataSnapshot.getValue<HashMap<String, String>>()!!.values.toList()
+        else
+            emptyList()
     }
 
     suspend fun addToFav(wallpaper: Wallpaper, userId: String) {

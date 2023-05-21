@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class WallpapersScreenVM(private val dbname: String) : ViewModel() {
+class WallpapersScreenVM(private val sourceName: String) : ViewModel() {
 
     private var pWallpapers = MutableStateFlow(listOf<Wallpaper>())
     val wallpapers: StateFlow<List<Wallpaper>> = pWallpapers.asStateFlow()
@@ -22,11 +22,11 @@ class WallpapersScreenVM(private val dbname: String) : ViewModel() {
 
     init {
         updateWallpapers()
-        Log.d("VMINIT", dbname)
+        Log.d("VMINIT", sourceName)
     }
 
     private fun updateWallpapers() {
-        wallpapersRepo.update(pWallpapers, userId, dbname)
+        wallpapersRepo.update(pWallpapers, userId, sourceName)
     }
 
     fun changeFav(wallpaper: Wallpaper) {
