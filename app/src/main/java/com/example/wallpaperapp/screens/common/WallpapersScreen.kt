@@ -32,7 +32,6 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
@@ -46,7 +45,7 @@ fun WallpapersCommonScreen(
     navController: NavHostController,
     headerText: String,
     showAddButton: Boolean = false,
-    vm: WallpapersScreenVM = viewModel()
+    vm: WallpapersScreenVM
 ) {
 
     val wallpapers by vm.wallpapers.collectAsState()

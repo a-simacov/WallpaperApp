@@ -27,23 +27,35 @@ class RemoteDataSource {
     // Will not attempt reconnect. Reason: Database lives in a different region.
     // Please change your database URL to https://wallpaperapp-d3bc3-default-rtdb.europe-west1.firebasedatabase.app
 
-    fun updateWallpapers(wallpapers: MutableStateFlow<List<Wallpaper>>, userId: String) {
-        database.getReference("wallpapers").addValueEventListener(
+    fun updateWallpapers(wallpapers: MutableStateFlow<List<Wallpaper>>, userId: String, dbName: String) {
+
+        initWallPaperListener(wallpapers, userId)
+//        initFavsListener(wallpapers, userId)
+
+    }
+
+    private fun initWallPaperListener(wallpapers: MutableStateFlow<List<Wallpaper>>, userId: String) {
+
+            database.getReference("wallpapers").addValueEventListener(
             object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     if (dataSnapshot.exists()) {
                         wallpapers.update {
                             dataSnapshot.getValue<HashMap<String, Wallpaper>>()!!.values.toList()
                         }
+                        initFavsListener(wallpapers, userId)
                     }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Log.w("RTDB ERROR", "Failed to read value.", error.toException())
+                    Log.d("RTDB ERROR", "Failed to read value.", error.toException())
                 }
             }
         )
 
+    }
+
+    private fun initFavsListener(wallpapers: MutableStateFlow<List<Wallpaper>>, userId: String) {
         database.getReference("favourites/$userId").addValueEventListener(
             object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -61,7 +73,7 @@ class RemoteDataSource {
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Log.w("RTDB ERROR", "Failed to read value.", error.toException())
+                    Log.d("RTDB ERROR", "Failed to read value.", error.toException())
                 }
             }
         )
@@ -79,14 +91,12 @@ class RemoteDataSource {
     suspend fun deleteFromFav(wallpaper: Wallpaper, userId: String) {
         try {
             val dbRef = database.getReference("favourites")
-            val res = dbRef.child(userId).child("").get().await()
+            val res = dbRef.child(userId).get().await()
             val list = res.children.toList()
             for (item in list) {
-                if (item.exists()) {
-                    if (wallpaper.id == item.child("id").value) {
-                        item.ref.removeValue()
-                        break
-                    }
+                if (wallpaper.id == item.value) {
+                    item.ref.removeValue()
+                    break
                 }
             }
         } catch (e: Exception) {
