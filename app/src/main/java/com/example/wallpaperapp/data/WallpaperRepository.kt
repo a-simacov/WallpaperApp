@@ -1,6 +1,8 @@
 package com.example.wallpaperapp.data
 
 import android.net.Uri
+import com.example.wallpaperapp.tools.DataHandler
+import com.example.wallpaperapp.tools.safeCall
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class WallpaperRepository() {
@@ -11,8 +13,11 @@ class WallpaperRepository() {
         remoteDataSource.updateWallpapers(wallpapers, userId, sourceName)
     }
 
-    suspend fun add(wallpaper: Wallpaper, imgLocalUri: Uri) {
-        remoteDataSource.addWallpaper(wallpaper, imgLocalUri)
+    suspend fun add(wallpaper: Wallpaper, imgLocalUri: Uri): DataHandler<Wallpaper> {
+        return safeCall {
+            remoteDataSource.addWallpaper(wallpaper, imgLocalUri)
+            DataHandler.SUCCESS(wallpaper)
+        }
     }
 
     suspend fun changeFavourite(wallpaper: Wallpaper, userId: String) {

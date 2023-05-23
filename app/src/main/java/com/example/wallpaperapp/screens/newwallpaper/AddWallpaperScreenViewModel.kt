@@ -1,33 +1,34 @@
-package com.example.wallpaperapp.screens
+package com.example.wallpaperapp.screens.newwallpaper
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.wallpaperapp.data.Wallpaper
 import com.example.wallpaperapp.data.WallpaperRepository
+import com.example.wallpaperapp.tools.DataHandler
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class AddWallpaperScreenViewModel : ViewModel() {
 
-    private var pOpExecuted = MutableStateFlow(false)
-    val opExecuted: StateFlow<Boolean> = pOpExecuted.asStateFlow()
+    private val _saveImgUiState: MutableStateFlow<DataHandler<Wallpaper>> = MutableStateFlow(DataHandler.IDLE())
+    val saveImgUiState: StateFlow<DataHandler<Wallpaper>> = _saveImgUiState
+
 
     private val wallpaperRepo = WallpaperRepository()
 
     fun saveImage(imgNameState: String, imgLocalUri: Uri) {
         viewModelScope.launch {
+            _saveImgUiState.update { DataHandler.LOADING() }
             val wallpaper = Wallpaper(
                 name = imgNameState,
                 authorId = Firebase.auth.currentUser?.uid ?: ""
             )
-            wallpaperRepo.add(wallpaper, imgLocalUri)
-            pOpExecuted.update { true }
+            _saveImgUiState.update { wallpaperRepo.add(wallpaper, imgLocalUri) }
         }
     }
 

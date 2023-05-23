@@ -38,7 +38,6 @@ import com.bumptech.glide.integration.compose.GlideImage
 import com.example.wallpaperapp.R
 import com.example.wallpaperapp.data.Wallpaper
 import com.example.wallpaperapp.navigation.NavigationItem
-import com.example.wallpaperapp.screens.ShowProgress
 
 @Composable
 fun WallpapersCommonScreen(

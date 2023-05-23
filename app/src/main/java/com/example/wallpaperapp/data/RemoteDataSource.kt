@@ -74,10 +74,8 @@ class RemoteDataSource {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val favs = getFavouriteIds(dataSnapshot)
                     wallpapers.update { list ->
-                        list.also {
-                            it.forEach { wallpaper ->
-                                wallpaper.isFavourite.value = (wallpaper.id in favs)
-                            }
+                        list.onEach { wallpaper ->
+                            wallpaper.isFavourite.value = (wallpaper.id in favs)
                         }
                     }
                 }
@@ -148,51 +146,29 @@ class RemoteDataSource {
     }
 
     suspend fun addWallpaper(wallpaper: Wallpaper, imgLocalUri: Uri) {
-        try {
-            val uid = UUID.randomUUID().toString()
-            val fileRef = Firebase.storage.reference.child("wallpapers/$uid")
+        val storage = Firebase.storage
+        storage.maxUploadRetryTimeMillis = 5000
 
-            putFile(fileRef, imgLocalUri)
-            wallpaper.imgUrl = getDownloadUrl(fileRef)
-            wallpaper.id = uid
+        val uid = UUID.randomUUID().toString()
+        val fileRef = storage.reference.child("wallpapers/$uid")
 
-            writeWallpaper(wallpaper)
-        } catch (e: Exception) {
-            //Toast.makeText(application.applicationContext, e.message, Toast.LENGTH_LONG).show()
-        }
-    }
+        fileRef.putFile(imgLocalUri).await()
+        wallpaper.imgUrl = fileRef.downloadUrl.await().toString()
+        wallpaper.id = uid
 
-    private suspend fun putFile(fileRef: StorageReference, imageUri: Uri) {
-        try {
-            fileRef.putFile(imageUri).await()
-        } catch (e: Exception) {
-            Log.d(tag, "Error putFile: ${e.message!!}")
-        }
-    }
-
-    private suspend fun getDownloadUrl(fileRef: StorageReference): String {
-        return try {
-            fileRef.downloadUrl.await().toString()
-        } catch (e: Exception) {
-            Log.d(tag, "Error downloadUrl: ${e.message!!}")
-            ""
-        }
+        writeWallpaper(wallpaper)
     }
 
     private fun writeWallpaper(wallpaper: Wallpaper) {
-        try {
-            val dbRef = database.getReference("wallpapers")
-            dbRef.child(wallpaper.id).setValue(
-                object {
-                    val id = wallpaper.id
-                    val name = wallpaper.name
-                    val imgUrl = wallpaper.imgUrl
-                    val authorId = wallpaper.authorId
-                }
-            )
-        } catch (e: Exception) {
-            Log.d(tag, "Error setValue: ${e.message!!}")
-        }
+        val dbRef = database.getReference("wallpapers")
+        dbRef.child(wallpaper.id).setValue(
+            object {
+                val id = wallpaper.id
+                val name = wallpaper.name
+                val imgUrl = wallpaper.imgUrl
+                val authorId = wallpaper.authorId
+            }
+        )
     }
 
 }

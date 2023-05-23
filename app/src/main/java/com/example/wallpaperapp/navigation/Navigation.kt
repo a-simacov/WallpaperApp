@@ -6,7 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.wallpaperapp.screens.AddWallpaperScreen
+import com.example.wallpaperapp.screens.newwallpaper.AddWallpaperScreen
 import com.example.wallpaperapp.screens.DownloadsScreen
 import com.example.wallpaperapp.screens.FavouritesScreen
 import com.example.wallpaperapp.screens.HomeScreen
