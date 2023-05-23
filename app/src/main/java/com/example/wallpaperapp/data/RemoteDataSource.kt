@@ -2,13 +2,14 @@ package com.example.wallpaperapp.data
 
 import android.net.Uri
 import android.util.Log
+import com.example.wallpaperapp.tools.DataHandler
+import com.example.wallpaperapp.tools.safeCall
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,7 +32,7 @@ class RemoteDataSource {
     // Please change your database URL to https://wallpaperapp-d3bc3-default-rtdb.europe-west1.firebasedatabase.app
 
     fun updateWallpapers(
-        wallpapers: MutableStateFlow<List<Wallpaper>>,
+        wallpapers: MutableStateFlow<DataHandler<List<Wallpaper>>>,
         userId: String,
         sourceName: String
     ) {
@@ -45,19 +46,21 @@ class RemoteDataSource {
     }
 
     private fun initWallpapersListener(
-        wallpapers: MutableStateFlow<List<Wallpaper>>,
+        wallpapers: MutableStateFlow<DataHandler<List<Wallpaper>>>,
         userId: String
     ) {
 
         database.getReference("wallpapers").addValueEventListener(
             object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    if (dataSnapshot.exists()) {
-                        wallpapers.update {
-                            dataSnapshot.getValue<HashMap<String, Wallpaper>>()!!.values.toList()
+                    wallpapers.update {
+                        safeCall {
+                            DataHandler.SUCCESS(
+                                dataSnapshot.getValue<HashMap<String, Wallpaper>>()!!.values.toList()
+                            )
                         }
-                        initFavsListener(wallpapers, userId)
                     }
+                    initFavsListener(wallpapers, userId)
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -68,13 +71,16 @@ class RemoteDataSource {
 
     }
 
-    private fun initFavsListener(wallpapers: MutableStateFlow<List<Wallpaper>>, userId: String) {
+    private fun initFavsListener(
+        wallpapers: MutableStateFlow<DataHandler<List<Wallpaper>>>,
+        userId: String
+    ) {
         database.getReference("favourites/$userId").addValueEventListener(
             object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val favs = getFavouriteIds(dataSnapshot)
-                    wallpapers.update { list ->
-                        list.onEach { wallpaper ->
+                    wallpapers.value.data.also { list ->
+                        list?.onEach { wallpaper ->
                             wallpaper.isFavourite.value = (wallpaper.id in favs)
                         }
                     }
@@ -87,22 +93,28 @@ class RemoteDataSource {
         )
     }
 
-    private fun initFavsFilteredListener(wallpapers: MutableStateFlow<List<Wallpaper>>, userId: String) {
+    private fun initFavsFilteredListener(
+        wallpapers: MutableStateFlow<DataHandler<List<Wallpaper>>>,
+        userId: String
+    ) {
         database.getReference("favourites/$userId").addValueEventListener(
             object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val favs = getFavouriteIds(dataSnapshot)
+                    val favIds = getFavouriteIds(dataSnapshot)
                     CoroutineScope(Dispatchers.IO).launch {
                         val dbRef = database.getReference("wallpapers")
-                        val list = mutableListOf<Wallpaper>()
-                        for (fav in favs) {
-                            val res = dbRef.child(fav).get().await().getValue<Wallpaper>()
-                            res?.also {
-                                res.isFavourite.value = true
-                                list.add(it)
+                        val favWallpapers = mutableListOf<Wallpaper>()
+                        for (favId in favIds) {
+                            dbRef.child(favId).get().await().getValue<Wallpaper>()?.also {
+                                it.isFavourite.value = true
+                                favWallpapers.add(it)
                             }
                         }
-                        wallpapers.update { list }
+                        wallpapers.update {
+                            safeCall {
+                                DataHandler.SUCCESS(favWallpapers)
+                            }
+                        }
                     }
                 }
 

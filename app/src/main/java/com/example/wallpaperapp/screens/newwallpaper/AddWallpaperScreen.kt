@@ -70,10 +70,8 @@ fun AddWallpaperScreen(
             )
             is DataHandler.LOADING -> ShowProgress()
             else -> {
-                saveImgUiState.message?.also {
-                    Toast.makeText(
-                        LocalContext.current, saveImgUiState.message, Toast.LENGTH_LONG
-                    ).show()
+                saveImgUiState.message?.also { message ->
+                    Toast.makeText(LocalContext.current, message, Toast.LENGTH_LONG).show()
                 }
                 navController.popBackStack(NavigationItem.Home.route, inclusive = false)
             }

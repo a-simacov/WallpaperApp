@@ -9,7 +9,7 @@ class WallpaperRepository() {
 
     private val remoteDataSource = RemoteDataSource()
 
-    fun update(wallpapers: MutableStateFlow<List<Wallpaper>>, userId: String, sourceName: String) {
+    fun update(wallpapers: MutableStateFlow<DataHandler<List<Wallpaper>>>, userId: String, sourceName: String) {
         remoteDataSource.updateWallpapers(wallpapers, userId, sourceName)
     }
 

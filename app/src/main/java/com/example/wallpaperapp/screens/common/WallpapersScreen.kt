@@ -38,6 +38,7 @@ import com.bumptech.glide.integration.compose.GlideImage
 import com.example.wallpaperapp.R
 import com.example.wallpaperapp.data.Wallpaper
 import com.example.wallpaperapp.navigation.NavigationItem
+import com.example.wallpaperapp.tools.DataHandler
 
 @Composable
 fun WallpapersCommonScreen(
@@ -47,7 +48,6 @@ fun WallpapersCommonScreen(
     vm: WallpapersScreenVM
 ) {
 
-    val wallpapers by vm.wallpapers.collectAsState()
     val onClickAddBtn = { navController.navigate(NavigationItem.NewWallpaper.route) }
     val onClickWallPaper: (wallpaper: Wallpaper) -> Unit = {
         navController.navigate(route = NavigationItem.SingleWallpaper.passUrl(it))
@@ -56,6 +56,8 @@ fun WallpapersCommonScreen(
         it.isFavourite.value = !it.isFavourite.value
         vm.changeFav(it)
     }
+
+    val dataHandler by vm.wallpapersDataHandler.collectAsState()
 
     Scaffold(
         floatingActionButton = {
@@ -71,10 +73,10 @@ fun WallpapersCommonScreen(
         ) {
             Header(headerText)
             SearchTextField()
-            if (wallpapers.isEmpty())
-                ShowProgress(progressColor = colorResource(id = R.color.main_theme))
-            else
-                WallpapersLazyGrid(wallpapers, onClickWallPaper, onSetFav)
+            when (dataHandler) {
+                is DataHandler.LOADING -> ShowProgress(progressColor = colorResource(id = R.color.main_theme))
+                else -> dataHandler.data?.let { WallpapersLazyGrid(it, onClickWallPaper, onSetFav) }
+            }
         }
     }
 
@@ -203,9 +205,11 @@ fun WallpaperItem(
             horizontalAlignment = Alignment.End,
         ) {
             Image(
-                modifier = Modifier.size(64.dp).clickable {
-                    onSetFav(wallpaper)
-                },
+                modifier = Modifier
+                    .size(64.dp)
+                    .clickable {
+                        onSetFav(wallpaper)
+                    },
                 painter = painterResource(
                     id = if (wallpaper.isFavourite.value) R.drawable.heart_checked else R.drawable.heart_unchecked
                 ),
@@ -214,7 +218,9 @@ fun WallpaperItem(
             )
         }
         Column(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
