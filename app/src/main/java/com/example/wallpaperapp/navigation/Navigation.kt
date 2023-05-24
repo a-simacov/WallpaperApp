@@ -10,7 +10,7 @@ import com.example.wallpaperapp.screens.newwallpaper.AddWallpaperScreen
 import com.example.wallpaperapp.screens.DownloadsScreen
 import com.example.wallpaperapp.screens.FavouritesScreen
 import com.example.wallpaperapp.screens.HomeScreen
-import com.example.wallpaperapp.screens.WallpaperScreen
+import com.example.wallpaperapp.screens.wallpaper.WallpaperScreen
 
 @Composable
 fun Navigation(navController: NavHostController) {
