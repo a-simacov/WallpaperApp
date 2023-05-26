@@ -5,7 +5,7 @@ import com.example.wallpaperapp.tools.DataHandler
 import com.example.wallpaperapp.tools.safeCall
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class WallpaperRepository() {
+class WallpaperRepository(private val dao: Dao) {
 
     private val remoteDataSource = RemoteDataSource()
 

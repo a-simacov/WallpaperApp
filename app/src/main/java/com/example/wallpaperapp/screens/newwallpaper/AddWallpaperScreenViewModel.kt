@@ -13,13 +13,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class AddWallpaperScreenViewModel : ViewModel() {
+class AddWallpaperScreenViewModel(private val wallpaperRepo: WallpaperRepository) : ViewModel() {
 
     private val _saveImgUiState: MutableStateFlow<DataHandler<Wallpaper>> = MutableStateFlow(DataHandler.IDLE())
     val saveImgUiState: StateFlow<DataHandler<Wallpaper>> = _saveImgUiState
-
-
-    private val wallpaperRepo = WallpaperRepository()
 
     fun saveImage(imgNameState: String, imgLocalUri: Uri) {
         viewModelScope.launch {

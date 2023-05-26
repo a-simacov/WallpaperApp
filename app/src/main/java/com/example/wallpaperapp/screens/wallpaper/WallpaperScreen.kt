@@ -25,6 +25,7 @@ import com.example.wallpaperapp.R
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.wallpaperapp.navigation.NavigationItem
+import com.example.wallpaperapp.screens.common.AppViewModelProvider
 import com.example.wallpaperapp.screens.common.ShowProgress
 import com.example.wallpaperapp.tools.DataHandler
 
@@ -32,7 +33,7 @@ import com.example.wallpaperapp.tools.DataHandler
 fun WallpaperScreen(
     navController: NavHostController,
     url: String,
-    vm: WallpaperScreenVM = viewModel()
+    vm: WallpaperScreenVM = viewModel(factory = AppViewModelProvider.provide())
 ) {
 
     val context = LocalContext.current

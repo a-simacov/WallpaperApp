@@ -9,12 +9,12 @@ import androidx.room.Query
 interface Dao {
 
     @Insert
-    suspend fun insertWallpaper(wallpaper: WallpaperLocal)
+    suspend fun insertWallpaper(wallpaper: Wallpaper)
 
     @Delete
-    suspend fun deleteWallpaper(wallpaper: WallpaperLocal)
+    suspend fun deleteWallpaper(wallpaper: Wallpaper)
 
     @Query("SELECT * FROM wallpapers")
-    fun getWallpapers(): LiveData<MutableList<WallpaperLocal>>
+    fun getWallpapers(): LiveData<MutableList<Wallpaper>>
 
 }

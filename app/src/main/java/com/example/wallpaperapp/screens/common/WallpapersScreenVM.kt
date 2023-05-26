@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class WallpapersScreenVM(private val sourceName: String) : ViewModel() {
+class WallpapersScreenVM(private val sourceName: String, private val wallpapersRepo: WallpaperRepository) : ViewModel() {
 
     private val _wallpapersDataHandler: MutableStateFlow<DataHandler<List<Wallpaper>>> =
         MutableStateFlow(
@@ -22,12 +22,10 @@ class WallpapersScreenVM(private val sourceName: String) : ViewModel() {
         )
     val wallpapersDataHandler: StateFlow<DataHandler<List<Wallpaper>>> = _wallpapersDataHandler
 
-    private val wallpapersRepo = WallpaperRepository()
     private val userId = Firebase.auth.currentUser?.uid ?: ""
 
     init {
         updateWallpapers()
-        Log.d("VMINIT", sourceName)
     }
 
     private fun updateWallpapers() {

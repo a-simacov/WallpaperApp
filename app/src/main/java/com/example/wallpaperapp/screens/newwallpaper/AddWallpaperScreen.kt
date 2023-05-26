@@ -38,13 +38,14 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.wallpaperapp.R
 import com.example.wallpaperapp.navigation.NavigationItem
+import com.example.wallpaperapp.screens.common.AppViewModelProvider
 import com.example.wallpaperapp.screens.common.ShowProgress
 import com.example.wallpaperapp.tools.DataHandler
 
 @Composable
 fun AddWallpaperScreen(
     navController: NavHostController,
-    vm: AddWallpaperScreenViewModel = viewModel()
+    vm: AddWallpaperScreenViewModel = viewModel(factory = AppViewModelProvider.provide())
 ) {
     var imgNameState by remember { mutableStateOf("") }
     var imgUriState by remember { mutableStateOf<Uri?>(null) }
