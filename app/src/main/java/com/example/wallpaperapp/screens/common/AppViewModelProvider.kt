@@ -19,24 +19,13 @@ object AppViewModelProvider {
                 AddWallpaperScreenViewModel(app().wallpaperRepository)
             }
             initializer {
-                WallpapersScreenVM(sourceName, app().wallpaperRepository)//app().wallpaperRepository)
+                WallpapersScreenVM(sourceName, app().wallpaperRepository)
             }
             initializer {
-                WallpaperScreenVM()
+                WallpaperScreenVM(app().wallpaperRepository)
             }
         }
     }
-//    val Factory = viewModelFactory {
-//        initializer {
-//            AddWallpaperScreenViewModel(app().wallpaperRepository)
-//        }
-//        initializer {
-//            WallpapersScreenVM(app().wallpaperRepository)//app().wallpaperRepository)
-//        }
-//        initializer {
-//            WallpaperScreenVM()
-//        }
-//    }
 }
 
 /**

@@ -28,7 +28,7 @@ fun Navigation(navController: NavHostController) {
         composable(
             route = NavigationItem.SingleWallpaper.route,
             arguments = listOf(
-                navArgument(IMG_URL_KEY) {
+                navArgument(ID_KEY) {
                     type = NavType.StringType
                     defaultValue = ""
                 },
@@ -36,7 +36,7 @@ fun Navigation(navController: NavHostController) {
         ) {
             WallpaperScreen(
                 navController,
-                it.arguments?.getString(IMG_URL_KEY)!!.toString(),
+                it.arguments?.getString(ID_KEY)!!.toString(),
             )
         }
         composable(NavigationItem.NewWallpaper.route) {

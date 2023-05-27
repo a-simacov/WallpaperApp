@@ -32,12 +32,14 @@ import com.example.wallpaperapp.tools.DataHandler
 @Composable
 fun WallpaperScreen(
     navController: NavHostController,
-    url: String,
+    wallpaperId: String,
     vm: WallpaperScreenVM = viewModel(factory = AppViewModelProvider.provide())
 ) {
 
+    vm.getWallpaper(wallpaperId)
     val context = LocalContext.current
 
+    val wallpaper by vm.wallpaper.collectAsState()
     val setWallpaperState by vm.setWallpaperState.collectAsState()
 
     Column(
@@ -47,8 +49,8 @@ fun WallpaperScreen(
         when (setWallpaperState) {
             is DataHandler.IDLE -> SetWallpaper(
                 modifier = Modifier.fillMaxWidth().weight(1f),
-                url = url,
-                onClick = { vm.setSystemWallpaper(context = context, url = url) },
+                url = wallpaper?.imgUrl,
+                onClick = { vm.setSystemWallpaper(context = context) },
             )
             is DataHandler.LOADING -> ShowProgress("Setting wallpaper...")
             else -> {
@@ -66,7 +68,7 @@ fun WallpaperScreen(
 @Composable
 fun SetWallpaper(
     modifier: Modifier = Modifier,
-    url: String,
+    url: String?,
     onClick: () -> Unit
 ) {
     Box(

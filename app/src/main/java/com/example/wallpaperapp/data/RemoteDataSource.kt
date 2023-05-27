@@ -183,4 +183,9 @@ class RemoteDataSource {
         )
     }
 
+    suspend fun get(id: String): Wallpaper {
+        val dbRef = database.getReference("wallpapers")
+        return dbRef.child(id).get().await().getValue<Wallpaper>()!!
+    }
+
 }

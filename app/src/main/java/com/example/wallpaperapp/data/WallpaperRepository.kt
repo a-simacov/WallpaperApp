@@ -28,4 +28,12 @@ class WallpaperRepository(private val dao: Dao) {
         }
     }
 
+    suspend fun getWallpaper(id: String): Wallpaper {
+        return remoteDataSource.get(id)
+    }
+
+    suspend fun saveLocal(wallpaper: Wallpaper) {
+        dao.insertWallpaper(wallpaper)
+    }
+
 }
