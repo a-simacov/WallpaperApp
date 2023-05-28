@@ -1,6 +1,5 @@
 package com.example.wallpaperapp.data
 
-import androidx.lifecycle.LiveData
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
@@ -15,6 +14,6 @@ interface Dao {
     suspend fun deleteWallpaper(wallpaper: Wallpaper)
 
     @Query("SELECT * FROM wallpapers")
-    fun getWallpapers(): LiveData<MutableList<Wallpaper>>
+    suspend fun getWallpapers(): List<Wallpaper>
 
 }

@@ -28,7 +28,9 @@ class WallpapersScreenVM(private val sourceName: String, private val wallpapersR
 
     private fun updateWallpapers() {
         _wallpapersDataHandler.update { DataHandler.LOADING() }
-        wallpapersRepo.update(_wallpapersDataHandler, userId, sourceName)
+        viewModelScope.launch {
+            wallpapersRepo.update(_wallpapersDataHandler, userId, sourceName)
+        }
     }
 
     fun changeFav(wallpaper: Wallpaper) {

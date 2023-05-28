@@ -51,7 +51,7 @@ class WallpaperScreenVM(private val wallpaperRepo: WallpaperRepository) : ViewMo
                 val bitmap = task.await()
                 wallpaperManager.setBitmap(bitmap)
                 val imgUri = saveBitmap(bitmap)
-                wallpaper.value?.let { wallpaperRepo.saveLocal(it) }
+                wallpaper.value?.let { wallpaperRepo.saveLocal(it, imgUri) }
                 DataHandler.SUCCESS(true)
             }
             _setWallpaperState.update { handler }

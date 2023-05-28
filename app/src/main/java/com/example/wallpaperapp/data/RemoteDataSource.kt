@@ -40,7 +40,6 @@ class RemoteDataSource {
         when (sourceName) {
             "HOME" -> initWallpapersListener(wallpapers, userId)
             "FAVOURITES" -> initFavsFilteredListener(wallpapers, userId)
-            "DOWNLOADS" -> TODO("NOT IMPLEMENTED, AWAITING ROOM DB")
         }
 
     }

@@ -4,13 +4,22 @@ import android.net.Uri
 import com.example.wallpaperapp.tools.DataHandler
 import com.example.wallpaperapp.tools.safeCall
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
+import java.net.URI
 
 class WallpaperRepository(private val dao: Dao) {
 
     private val remoteDataSource = RemoteDataSource()
 
-    fun update(wallpapers: MutableStateFlow<DataHandler<List<Wallpaper>>>, userId: String, sourceName: String) {
-        remoteDataSource.updateWallpapers(wallpapers, userId, sourceName)
+    suspend fun update(wallpapers: MutableStateFlow<DataHandler<List<Wallpaper>>>, userId: String, sourceName: String) {
+        if (sourceName == "DOWNLOADS")
+            wallpapers.update {
+                safeCall {
+                    DataHandler.SUCCESS(dao.getWallpapers())
+                }
+            }
+        else
+            remoteDataSource.updateWallpapers(wallpapers, userId, sourceName)
     }
 
     suspend fun add(wallpaper: Wallpaper, imgLocalUri: Uri): DataHandler<Wallpaper> {
@@ -32,7 +41,8 @@ class WallpaperRepository(private val dao: Dao) {
         return remoteDataSource.get(id)
     }
 
-    suspend fun saveLocal(wallpaper: Wallpaper) {
+    suspend fun saveLocal(wallpaper: Wallpaper, uri: URI) {
+        wallpaper.imgUrl = uri.toString()
         dao.insertWallpaper(wallpaper)
     }
 
