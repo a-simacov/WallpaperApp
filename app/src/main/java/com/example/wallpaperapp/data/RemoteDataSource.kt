@@ -33,19 +33,6 @@ class RemoteDataSource {
 
     fun updateWallpapers(
         wallpapers: MutableStateFlow<DataHandler<List<Wallpaper>>>,
-        userId: String,
-        sourceName: String
-    ) {
-
-        when (sourceName) {
-            "HOME" -> initWallpapersListener(wallpapers, userId)
-            "FAVOURITES" -> initFavsFilteredListener(wallpapers, userId)
-        }
-
-    }
-
-    private fun initWallpapersListener(
-        wallpapers: MutableStateFlow<DataHandler<List<Wallpaper>>>,
         userId: String
     ) {
 
@@ -92,7 +79,7 @@ class RemoteDataSource {
         )
     }
 
-    private fun initFavsFilteredListener(
+    fun updateFavs(
         wallpapers: MutableStateFlow<DataHandler<List<Wallpaper>>>,
         userId: String
     ) {

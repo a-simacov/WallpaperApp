@@ -12,14 +12,15 @@ class WallpaperRepository(private val dao: Dao) {
     private val remoteDataSource = RemoteDataSource()
 
     suspend fun update(wallpapers: MutableStateFlow<DataHandler<List<Wallpaper>>>, userId: String, sourceName: String) {
-        if (sourceName == "DOWNLOADS")
-            wallpapers.update {
+        when (sourceName) {
+            "HOME" -> remoteDataSource.updateWallpapers(wallpapers, userId)
+            "FAVOURITES" -> remoteDataSource.updateFavs(wallpapers, userId)
+            "DOWNLOADS" -> wallpapers.update {
                 safeCall {
                     DataHandler.SUCCESS(dao.getWallpapers())
                 }
             }
-        else
-            remoteDataSource.updateWallpapers(wallpapers, userId, sourceName)
+        }
     }
 
     suspend fun add(wallpaper: Wallpaper, imgLocalUri: Uri): DataHandler<Wallpaper> {
