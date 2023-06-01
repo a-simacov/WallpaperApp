@@ -3,23 +3,18 @@ package com.example.wallpaperapp.data
 import android.net.Uri
 import com.example.wallpaperapp.tools.DataHandler
 import com.example.wallpaperapp.tools.safeCall
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.Flow
 import java.net.URI
 
 class WallpaperRepository(private val dao: Dao) {
 
     private val remoteDataSource = RemoteDataSource()
 
-    suspend fun update(wallpapers: MutableStateFlow<DataHandler<List<Wallpaper>>>, userId: String, sourceName: String) {
-        when (sourceName) {
-            "HOME" -> remoteDataSource.updateWallpapers(wallpapers, userId)
-            "FAVOURITES" -> remoteDataSource.updateFavs(wallpapers, userId)
-            "DOWNLOADS" -> wallpapers.update {
-                safeCall {
-                    DataHandler.SUCCESS(dao.getWallpapers())
-                }
-            }
+    fun getWallpapers(sourceName: String, userId: String): Flow<List<Wallpaper>> {
+        return when (sourceName) {
+            "DOWNLOADS" -> dao.getWallpapers()
+            "FAVOURITES" -> remoteDataSource.getFavsFlow(userId)
+            else -> remoteDataSource.getListFlow(userId)
         }
     }
 

@@ -38,7 +38,6 @@ import com.bumptech.glide.integration.compose.GlideImage
 import com.example.wallpaperapp.R
 import com.example.wallpaperapp.data.Wallpaper
 import com.example.wallpaperapp.navigation.NavigationItem
-import com.example.wallpaperapp.tools.DataHandler
 
 @Composable
 fun WallpapersCommonScreen(
@@ -57,7 +56,7 @@ fun WallpapersCommonScreen(
         vm.changeFav(it)
     }
 
-    val dataHandler by vm.wallpapersDataHandler.collectAsState()
+    val homeUiState by vm.homeUiState.collectAsState()
 
     Scaffold(
         floatingActionButton = {
@@ -73,10 +72,7 @@ fun WallpapersCommonScreen(
         ) {
             Header(headerText)
             SearchTextField()
-            when (dataHandler) {
-                is DataHandler.LOADING -> ShowProgress(progressColor = colorResource(id = R.color.main_theme))
-                else -> dataHandler.data?.let { WallpapersLazyGrid(it, onClickWallPaper, onSetFav) }
-            }
+            WallpapersLazyGrid(homeUiState.itemList, onClickWallPaper, onSetFav)
         }
     }
 

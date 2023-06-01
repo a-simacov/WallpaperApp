@@ -2,8 +2,6 @@ package com.example.wallpaperapp.data
 
 import android.net.Uri
 import android.util.Log
-import com.example.wallpaperapp.tools.DataHandler
-import com.example.wallpaperapp.tools.safeCall
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -13,8 +11,10 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
@@ -31,62 +31,56 @@ class RemoteDataSource {
     // Will not attempt reconnect. Reason: Database lives in a different region.
     // Please change your database URL to https://wallpaperapp-d3bc3-default-rtdb.europe-west1.firebasedatabase.app
 
-    fun updateWallpapers(
-        wallpapers: MutableStateFlow<DataHandler<List<Wallpaper>>>,
-        userId: String
-    ) {
-
-        database.getReference("wallpapers").addValueEventListener(
-            object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    wallpapers.update {
-                        safeCall {
-                            DataHandler.SUCCESS(
-                                dataSnapshot.getValue<HashMap<String, Wallpaper>>()!!.values.toList()
-                            )
-                        }
-                    }
-                    initFavsListener(wallpapers, userId)
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Log.d("RTDB ERROR", "Failed to read value.", error.toException())
-                }
-            }
-        )
-
-    }
-
-    private fun initFavsListener(
-        wallpapers: MutableStateFlow<DataHandler<List<Wallpaper>>>,
-        userId: String
-    ) {
-        database.getReference("favourites/$userId").addValueEventListener(
-            object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val favs = getFavouriteIds(dataSnapshot)
-                    wallpapers.value.data.also { list ->
-                        list?.onEach { wallpaper ->
-                            wallpaper.isFavourite.value = (wallpaper.id in favs)
-                        }
+    fun getListFlow(userId: String): Flow<List<Wallpaper>> {
+        val ref = database.getReference("wallpapers")
+        return callbackFlow {
+            val listener = object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val allWallpapers =
+                        snapshot.getValue<HashMap<String, Wallpaper>>()!!.values.toList()
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val wallpapers = setFavs(allWallpapers, userId).first()
+                        trySend(wallpapers)
                     }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Log.d("RTDB ERROR", "Failed to read value.", error.toException())
+                    close(error.toException())
                 }
             }
-        )
+            ref.addValueEventListener(listener)
+            awaitClose { ref.removeEventListener(listener) }
+        }
     }
 
-    fun updateFavs(
-        wallpapers: MutableStateFlow<DataHandler<List<Wallpaper>>>,
-        userId: String
-    ) {
-        database.getReference("favourites/$userId").addValueEventListener(
-            object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val favIds = getFavouriteIds(dataSnapshot)
+    private fun setFavs(allWallpapers: List<Wallpaper>, userId: String): Flow<List<Wallpaper>> {
+        val ref = database.getReference("favourites/$userId")
+        return callbackFlow {
+            val listener = object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val favIds = getFavouriteIds(snapshot)
+                    allWallpapers.onEach { wallpaper ->
+                        wallpaper.isFavourite.value = (wallpaper.id in favIds)
+                    }
+                    trySend(allWallpapers)
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    close(error.toException())
+                }
+
+            }
+            ref.addValueEventListener(listener)
+            awaitClose { ref.removeEventListener(listener) }
+        }
+    }
+
+    fun getFavsFlow(userId: String): Flow<List<Wallpaper>> {
+        val ref = database.getReference("favourites/$userId")
+        return callbackFlow {
+            val listener = object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val favIds = getFavouriteIds(snapshot)
                     CoroutineScope(Dispatchers.IO).launch {
                         val dbRef = database.getReference("wallpapers")
                         val favWallpapers = mutableListOf<Wallpaper>()
@@ -96,19 +90,17 @@ class RemoteDataSource {
                                 favWallpapers.add(it)
                             }
                         }
-                        wallpapers.update {
-                            safeCall {
-                                DataHandler.SUCCESS(favWallpapers)
-                            }
-                        }
+                        trySend(favWallpapers)
                     }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Log.d("RTDB ERROR", "Failed to read value.", error.toException())
+                    close(error.toException())
                 }
             }
-        )
+            ref.addValueEventListener(listener)
+            awaitClose { ref.removeEventListener(listener) }
+        }
     }
 
     private fun getFavouriteIds(dataSnapshot: DataSnapshot): List<String> {
