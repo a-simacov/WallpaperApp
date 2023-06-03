@@ -17,7 +17,7 @@ fun HomeScreen(navController: NavHostController) {
         navController = navController,
         showAddButton = true,
         headerText = stringResource(id = R.string.wallpaper),
-        vm = viewModel(factory = AppViewModelProvider.provide("HOME"))
+        vm = viewModel(factory = AppViewModelProvider.provide())
     )
 
 }

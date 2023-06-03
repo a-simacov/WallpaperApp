@@ -13,13 +13,13 @@ import com.example.wallpaperapp.screens.wallpaper.WallpaperScreenVM
  * Provides Factory to create instance of ViewModel for the entire Inventory app
  */
 object AppViewModelProvider {
-    fun provide(sourceName: String = ""): ViewModelProvider.Factory {
+    fun provide(): ViewModelProvider.Factory {
         return viewModelFactory {
             initializer {
                 AddWallpaperScreenViewModel(app().wallpaperRepository)
             }
             initializer {
-                WallpapersScreenVM(sourceName, app().wallpaperRepository)
+                WallpapersScreenVM(app().wallpaperRepository)
             }
             initializer {
                 WallpaperScreenVM(app().wallpaperRepository)

@@ -15,7 +15,7 @@ fun FavouritesScreen(navController: NavHostController) {
         navController = navController,
         showAddButton = false,
         headerText = stringResource(id = R.string.favourites),
-        vm = viewModel(factory = AppViewModelProvider.provide("FAVOURITES"))
+        vm = viewModel(factory = AppViewModelProvider.provide())
     )
 
 }

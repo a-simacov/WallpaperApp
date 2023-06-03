@@ -15,7 +15,7 @@ fun DownloadsScreen(navController: NavHostController) {
         navController = navController,
         showAddButton = false,
         headerText = stringResource(id = R.string.downloads),
-        vm = viewModel(factory = AppViewModelProvider.provide("DOWNLOADS"))
+        vm = viewModel(factory = AppViewModelProvider.provide())
     )
 
 }

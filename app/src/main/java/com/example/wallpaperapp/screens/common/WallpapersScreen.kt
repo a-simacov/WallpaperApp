@@ -59,6 +59,10 @@ fun WallpapersCommonScreen(
 
     val dataHandler by vm.wallpapersDataHandler.collectAsState()
 
+    LaunchedEffect(Unit) {
+        vm.updateWallpapers(navController.currentDestination!!.route!!.uppercase())
+    }
+
     Scaffold(
         floatingActionButton = {
             if (showAddButton)
