@@ -12,12 +12,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class WallpapersScreenVM(private val sourceName: String, private val wallpapersRepo: WallpaperRepository) : ViewModel() {
+class WallpapersScreenVM(sourceName: String, private val wallpapersRepo: WallpaperRepository) : ViewModel() {
 
     private val userId = Firebase.auth.currentUser?.uid ?: ""
 
     val homeUiState: StateFlow<HomeUiState> =
-        wallpapersRepo.getWallpapers(sourceName, userId).map { HomeUiState(it) }
+        wallpapersRepo.getWallpapers(sourceName, userId)
+            .map { HomeUiState(it) }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000L),

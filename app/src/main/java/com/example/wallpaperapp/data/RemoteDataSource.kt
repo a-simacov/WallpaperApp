@@ -11,10 +11,10 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
@@ -25,53 +25,61 @@ class RemoteDataSource {
     private val database = Firebase.database(
         "https://wallpaperapp-d3bc3-default-rtdb.europe-west1.firebasedatabase.app"
     )
-    // Если не указывать ссылку на RTDB, то получаю вот такое сообщение в логе.
-
-    // pc_0 - Firebase Database connection was forcefully killed by the server.
-    // Will not attempt reconnect. Reason: Database lives in a different region.
-    // Please change your database URL to https://wallpaperapp-d3bc3-default-rtdb.europe-west1.firebasedatabase.app
 
     fun getListFlow(userId: String): Flow<List<Wallpaper>> {
-        val ref = database.getReference("wallpapers")
-        return callbackFlow {
-            val listener = object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val allWallpapers =
-                        snapshot.getValue<HashMap<String, Wallpaper>>()!!.values.toList()
-                    CoroutineScope(Dispatchers.IO).launch {
-                        val wallpapers = setFavs(allWallpapers, userId).first()
-                        trySend(wallpapers)
-                    }
-                }
+        val refWallpapers = database.getReference("wallpapers")
+        val refFavs = database.getReference("favourites/$userId")
+        var allWallpapers = mutableListOf<Wallpaper>()
 
-                override fun onCancelled(error: DatabaseError) {
-                    close(error.toException())
-                }
+        return callbackFlow {
+            val listenerWallpapers = newListenerWallpapers(this, allWallpapers, userId)
+            val listenerFavs = newListenerFavs(this, allWallpapers)
+            refWallpapers.addValueEventListener(listenerWallpapers)
+            refFavs.addValueEventListener(listenerFavs)
+            awaitClose {
+                refWallpapers.removeEventListener(listenerWallpapers)
+                refFavs.removeEventListener(listenerFavs)
             }
-            ref.addValueEventListener(listener)
-            awaitClose { ref.removeEventListener(listener) }
         }
     }
 
-    private fun setFavs(allWallpapers: List<Wallpaper>, userId: String): Flow<List<Wallpaper>> {
-        val ref = database.getReference("favourites/$userId")
-        return callbackFlow {
-            val listener = object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val favIds = getFavouriteIds(snapshot)
-                    allWallpapers.onEach { wallpaper ->
-                        wallpaper.isFavourite.value = (wallpaper.id in favIds)
-                    }
-                    trySend(allWallpapers)
-                }
+    private fun newListenerWallpapers(
+        producerScope: ProducerScope<List<Wallpaper>>,
+        allWallpapers: MutableList<Wallpaper>,
+        userId: String
+    ): ValueEventListener {
+        return object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                allWallpapers.addAll(
+                    snapshot.getValue<HashMap<String, Wallpaper>>()!!.values.toMutableList()
+                )
 
-                override fun onCancelled(error: DatabaseError) {
-                    close(error.toException())
+                CoroutineScope(Dispatchers.IO).launch {
+                    val favRef = database.getReference("favourites/$userId")
+                    updateFavs(favRef.get().await(), allWallpapers)
+                    producerScope.trySend(allWallpapers)
                 }
-
             }
-            ref.addValueEventListener(listener)
-            awaitClose { ref.removeEventListener(listener) }
+
+            override fun onCancelled(error: DatabaseError) {
+                producerScope.close(error.toException())
+            }
+        }
+    }
+
+    private fun newListenerFavs(
+        producerScope: ProducerScope<List<Wallpaper>>,
+        allWallpapers: MutableList<Wallpaper>
+    ): ValueEventListener {
+        return object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                updateFavs(snapshot, allWallpapers)
+                producerScope.trySend(allWallpapers)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                producerScope.close(error.toException())
+            }
         }
     }
 
@@ -100,6 +108,13 @@ class RemoteDataSource {
             }
             ref.addValueEventListener(listener)
             awaitClose { ref.removeEventListener(listener) }
+        }
+    }
+
+    private fun updateFavs(snapshot: DataSnapshot, allWallpapers: MutableList<Wallpaper>) {
+        val favIds = getFavouriteIds(snapshot)
+        allWallpapers.onEach { wallpaper ->
+            wallpaper.isFavourite.value = (wallpaper.id in favIds)
         }
     }
 

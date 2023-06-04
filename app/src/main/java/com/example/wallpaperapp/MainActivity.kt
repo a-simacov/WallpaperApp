@@ -3,7 +3,7 @@ package com.example.wallpaperapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.example.wallpaperapp.navigation.MainScreen
+import com.example.wallpaperapp.screens.MainScreen
 
 class MainActivity : ComponentActivity() {
 

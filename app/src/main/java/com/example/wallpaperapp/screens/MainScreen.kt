@@ -1,14 +1,19 @@
-package com.example.wallpaperapp.navigation
+package com.example.wallpaperapp.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.wallpaperapp.R
+import com.example.wallpaperapp.navigation.BottomNavigationBar
+import com.example.wallpaperapp.navigation.Navigation
 
 @Composable
 fun MainScreen() {
@@ -16,7 +21,10 @@ fun MainScreen() {
     val navController = rememberNavController()
 
     Scaffold(
-        bottomBar = { BottomNavigationBar(navController) },
+        bottomBar = {
+            if (currentRoute(navController = navController) == null)
+                BottomNavigationBar(navController)
+        },
         content = { padding ->
             Box(modifier = Modifier.padding(padding)) {
                 Navigation(navController = navController)
@@ -26,6 +34,12 @@ fun MainScreen() {
         backgroundColor = colorResource(R.color.main_theme),
     )
 
+}
+
+@Composable
+fun currentRoute(navController: NavHostController): String? {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    return navBackStackEntry?.arguments?.getString("id")
 }
 
 @Preview
