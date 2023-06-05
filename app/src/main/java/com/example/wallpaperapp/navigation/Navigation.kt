@@ -6,10 +6,13 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.wallpaperapp.screens.auth.PreAuthScreen
+import com.example.wallpaperapp.screens.auth.SignInScreen
+import com.example.wallpaperapp.screens.auth.SignUpScreen
 import com.example.wallpaperapp.screens.newwallpaper.AddWallpaperScreen
-import com.example.wallpaperapp.screens.DownloadsScreen
-import com.example.wallpaperapp.screens.FavouritesScreen
-import com.example.wallpaperapp.screens.HomeScreen
+import com.example.wallpaperapp.screens.bottom.DownloadsScreen
+import com.example.wallpaperapp.screens.bottom.FavouritesScreen
+import com.example.wallpaperapp.screens.bottom.HomeScreen
 import com.example.wallpaperapp.screens.wallpaper.WallpaperScreen
 
 @Composable
@@ -41,6 +44,15 @@ fun Navigation(navController: NavHostController) {
         }
         composable(NavigationItem.NewWallpaper.route) {
             AddWallpaperScreen(navController)
+        }
+        composable(NavigationItem.PreAuth.route) {
+            PreAuthScreen(navController)
+        }
+        composable(NavigationItem.SignUp.route) {
+            SignUpScreen(navController)
+        }
+        composable(NavigationItem.SignIn.route) {
+            SignInScreen(navController)
         }
     }
 

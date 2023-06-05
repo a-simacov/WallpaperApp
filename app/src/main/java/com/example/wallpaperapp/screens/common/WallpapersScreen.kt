@@ -47,7 +47,12 @@ fun WallpapersCommonScreen(
     vm: WallpapersScreenVM
 ) {
 
-    val onClickAddBtn = { navController.navigate(NavigationItem.NewWallpaper.route) }
+    val onClickAddBtn = {
+        if (vm.userId.isEmpty())
+            navController.navigate(NavigationItem.NewWallpaper.route)
+        else
+            navController.navigate(NavigationItem.PreAuth.route)
+    }
     val onClickWallPaper: (wallpaper: Wallpaper) -> Unit = {
         navController.navigate(route = NavigationItem.SingleWallpaper.passUrl(it))
     }

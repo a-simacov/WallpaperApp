@@ -25,4 +25,13 @@ sealed class NavigationItem(var route: String, var icon: Int, var title: String)
     object NewWallpaper :
         NavigationItem("new_wallpaper", R.drawable.wallpaper_icon, "New wallpaper")
 
+    object PreAuth :
+        NavigationItem("pre_auth", R.drawable.wallpaper_icon, "Continue auth")
+
+    object SignIn :
+        NavigationItem("sign_in", R.drawable.wallpaper_icon, "Sign in")
+
+    object SignUp :
+        NavigationItem("sign_up", R.drawable.wallpaper_icon, "Sign up")
+
 }

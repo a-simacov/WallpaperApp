@@ -29,7 +29,7 @@ class RemoteDataSource {
     fun getListFlow(userId: String): Flow<List<Wallpaper>> {
         val refWallpapers = database.getReference("wallpapers")
         val refFavs = database.getReference("favourites/$userId")
-        var allWallpapers = mutableListOf<Wallpaper>()
+        val allWallpapers = mutableListOf<Wallpaper>()
 
         return callbackFlow {
             val listenerWallpapers = newListenerWallpapers(this, allWallpapers, userId)
@@ -57,8 +57,8 @@ class RemoteDataSource {
                 CoroutineScope(Dispatchers.IO).launch {
                     val favRef = database.getReference("favourites/$userId")
                     updateFavs(favRef.get().await(), allWallpapers)
-                    producerScope.trySend(allWallpapers)
                 }
+                producerScope.trySend(allWallpapers)
             }
 
             override fun onCancelled(error: DatabaseError) {

@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 
 class WallpapersScreenVM(sourceName: String, private val wallpapersRepo: WallpaperRepository) : ViewModel() {
 
-    private val userId = Firebase.auth.currentUser?.uid ?: ""
+    val userId = Firebase.auth.currentUser?.uid ?: ""
 
     val homeUiState: StateFlow<HomeUiState> =
         wallpapersRepo.getWallpapers(sourceName, userId)
@@ -31,6 +31,6 @@ class WallpapersScreenVM(sourceName: String, private val wallpapersRepo: Wallpap
         }
     }
 
-    data class HomeUiState(val itemList: List<Wallpaper> = listOf())
+    data class HomeUiState(val itemList: List<Wallpaper> = listOf(), val isLoading: Boolean = false)
 
 }

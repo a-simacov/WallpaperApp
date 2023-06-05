@@ -14,6 +14,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.wallpaperapp.R
 import com.example.wallpaperapp.navigation.BottomNavigationBar
 import com.example.wallpaperapp.navigation.Navigation
+import com.example.wallpaperapp.navigation.NavigationItem
 
 @Composable
 fun MainScreen() {
@@ -22,7 +23,7 @@ fun MainScreen() {
 
     Scaffold(
         bottomBar = {
-            if (currentRoute(navController = navController) == null)
+            if (showBottomBar(navController = navController))
                 BottomNavigationBar(navController)
         },
         content = { padding ->
@@ -37,9 +38,17 @@ fun MainScreen() {
 }
 
 @Composable
-fun currentRoute(navController: NavHostController): String? {
+fun showBottomBar(navController: NavHostController): Boolean {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    return navBackStackEntry?.arguments?.getString("id")
+    val route = navBackStackEntry?.destination?.route.toString()
+    val routesNoBottom = listOf<String>(
+        NavigationItem.SignIn.route,
+        NavigationItem.SignUp.route,
+        NavigationItem.NewWallpaper.route,
+        NavigationItem.PreAuth.route,
+        NavigationItem.SingleWallpaper.route,
+    )
+    return route !in routesNoBottom
 }
 
 @Preview
