@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 class App : Application() {
 
     private lateinit var appUser: User
-    private lateinit var userRepository: UserRepository
+    lateinit var userRepository: UserRepository
     lateinit var wallpaperRepository: WallpaperRepository
 
     override fun onCreate() {

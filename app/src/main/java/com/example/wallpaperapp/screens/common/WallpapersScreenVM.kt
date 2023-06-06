@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.wallpaperapp.data.Wallpaper
 import com.example.wallpaperapp.data.WallpaperRepository
+import com.example.wallpaperapp.user.UserRepository
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.SharingStarted
@@ -12,9 +13,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class WallpapersScreenVM(sourceName: String, private val wallpapersRepo: WallpaperRepository) : ViewModel() {
+class WallpapersScreenVM(
+    sourceName: String,
+    private val wallpapersRepo: WallpaperRepository,
+    private val userRepo: UserRepository
+) : ViewModel() {
 
     val userId = Firebase.auth.currentUser?.uid ?: ""
+    val userIsAnon = Firebase.auth.currentUser?.isAnonymous ?: false
 
     val homeUiState: StateFlow<HomeUiState> =
         wallpapersRepo.getWallpapers(sourceName, userId)
@@ -28,6 +34,12 @@ class WallpapersScreenVM(sourceName: String, private val wallpapersRepo: Wallpap
     fun changeFav(wallpaper: Wallpaper) {
         viewModelScope.launch {
             wallpapersRepo.changeFavourite(wallpaper, userId)
+        }
+    }
+
+    fun signOut() {
+        viewModelScope.launch {
+            userRepo.signOut()
         }
     }
 

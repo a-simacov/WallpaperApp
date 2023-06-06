@@ -7,8 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.wallpaperapp.screens.auth.PreAuthScreen
-import com.example.wallpaperapp.screens.auth.SignInScreen
-import com.example.wallpaperapp.screens.auth.SignUpScreen
+import com.example.wallpaperapp.screens.auth.AuthScreen
 import com.example.wallpaperapp.screens.newwallpaper.AddWallpaperScreen
 import com.example.wallpaperapp.screens.bottom.DownloadsScreen
 import com.example.wallpaperapp.screens.bottom.FavouritesScreen
@@ -49,10 +48,10 @@ fun Navigation(navController: NavHostController) {
             PreAuthScreen(navController)
         }
         composable(NavigationItem.SignUp.route) {
-            SignUpScreen(navController)
+            AuthScreen(navController, true)
         }
         composable(NavigationItem.SignIn.route) {
-            SignInScreen(navController)
+            AuthScreen(navController, false)
         }
     }
 

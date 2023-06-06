@@ -12,12 +12,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +30,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
@@ -48,10 +51,8 @@ fun WallpapersCommonScreen(
 ) {
 
     val onClickAddBtn = {
-        if (vm.userId.isEmpty())
-            navController.navigate(NavigationItem.NewWallpaper.route)
-        else
-            navController.navigate(NavigationItem.PreAuth.route)
+        val navItem = if (vm.userIsAnon) NavigationItem.PreAuth else NavigationItem.NewWallpaper
+        navController.navigate(route = navItem.route)
     }
     val onClickWallPaper: (wallpaper: Wallpaper) -> Unit = {
         navController.navigate(route = NavigationItem.SingleWallpaper.passUrl(it))
@@ -60,6 +61,7 @@ fun WallpapersCommonScreen(
         it.isFavourite.value = !it.isFavourite.value
         vm.changeFav(it)
     }
+    val onClickSignOut = { vm.signOut() }
 
     val homeUiState by vm.homeUiState.collectAsState()
 
@@ -75,7 +77,7 @@ fun WallpapersCommonScreen(
                 .padding(paddingValues)
                 .background(colorResource(id = R.color.white))
         ) {
-            Header(headerText)
+            Header(headerText, onClickSignOut)
             SearchTextField()
             WallpapersLazyGrid(homeUiState.itemList, onClickWallPaper, onSetFav)
         }
@@ -96,7 +98,7 @@ fun AddWallpaperButton(onClickAddBtn: () -> Unit, modifier: Modifier = Modifier)
 }
 
 @Composable
-fun Header(text: String) {
+fun Header(text: String, signOutOnClick: () -> Unit) {
 
     Row(
         modifier = Modifier.padding(start = 16.dp, top = 48.dp),
@@ -113,8 +115,22 @@ fun Header(text: String) {
             contentDescription = "place icon",
             contentScale = ContentScale.FillWidth,
         )
+        IconButton(
+            onClick = signOutOnClick
+        ) {
+            Icon(
+                imageVector = Icons.Filled.ExitToApp,
+                contentDescription = "sign out"
+            )
+        }
     }
 
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HedaerPreview() {
+    Header(text = "Wallpaper", {})
 }
 
 @Composable

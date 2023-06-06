@@ -64,8 +64,8 @@ fun PreAuthScreen(navController: NavHostController) {
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                PreAuthButton(caption = "Sign in", onClick = onSignUpClick)
-                PreAuthButton(caption = "Sign up", onClick = onSignInClick)
+                PreAuthButton(caption = "Sign in", onClick = onSignInClick)
+                PreAuthButton(caption = "Sign up", onClick = onSignUpClick)
                 PreAuthButton(caption = "Cancel", onClick = onCancelClick)
             }
         }

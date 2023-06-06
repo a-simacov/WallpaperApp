@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.wallpaperapp.App
+import com.example.wallpaperapp.screens.auth.AuthViewModel
 import com.example.wallpaperapp.screens.newwallpaper.AddWallpaperScreenViewModel
 import com.example.wallpaperapp.screens.wallpaper.WallpaperScreenVM
 
@@ -19,10 +20,13 @@ object AppViewModelProvider {
                 AddWallpaperScreenViewModel(app().wallpaperRepository)
             }
             initializer {
-                WallpapersScreenVM(sourceName, app().wallpaperRepository)
+                WallpapersScreenVM(sourceName, app().wallpaperRepository, app().userRepository)
             }
             initializer {
                 WallpaperScreenVM(app().wallpaperRepository)
+            }
+            initializer {
+                AuthViewModel(app().userRepository)
             }
         }
     }
