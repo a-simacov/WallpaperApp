@@ -4,6 +4,14 @@ import android.content.Context
 import com.example.wallpaperapp.App
 import com.example.wallpaperapp.tools.DataHandler
 import com.example.wallpaperapp.tools.safeCall
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
 
 class UserRepository(private val context: Context) {
 
@@ -36,6 +44,19 @@ class UserRepository(private val context: Context) {
     suspend fun signOut() {
         firebaseStorage.signOut()
         firebaseStorage.getUser()
+    }
+
+    fun getAuthState() = callbackFlow {
+        val auth = Firebase.auth
+        val authStateListener = FirebaseAuth.AuthStateListener {
+            CoroutineScope(Dispatchers.IO).launch {
+                trySend(firebaseStorage.getUser())
+            }
+        }
+        auth.addAuthStateListener(authStateListener)
+        awaitClose {
+            auth.removeAuthStateListener(authStateListener)
+        }
     }
 
 }

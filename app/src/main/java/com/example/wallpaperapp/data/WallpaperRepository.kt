@@ -1,6 +1,7 @@
 package com.example.wallpaperapp.data
 
 import android.net.Uri
+import android.util.Log
 import com.example.wallpaperapp.tools.DataHandler
 import com.example.wallpaperapp.tools.safeCall
 import kotlinx.coroutines.flow.Flow
@@ -11,6 +12,7 @@ class WallpaperRepository(private val dao: Dao) {
     private val remoteDataSource = RemoteDataSource()
 
     fun getWallpapers(sourceName: String, userId: String): Flow<List<Wallpaper>> {
+        Log.d("USER-WR", userId)
         return when (sourceName) {
             "DOWNLOADS" -> dao.getWallpapers()
             "FAVOURITES" -> remoteDataSource.getFavsFlow(userId)

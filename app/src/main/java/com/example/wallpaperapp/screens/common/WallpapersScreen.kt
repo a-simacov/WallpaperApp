@@ -1,5 +1,6 @@
 package com.example.wallpaperapp.screens.common
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -41,6 +42,7 @@ import com.bumptech.glide.integration.compose.GlideImage
 import com.example.wallpaperapp.R
 import com.example.wallpaperapp.data.Wallpaper
 import com.example.wallpaperapp.navigation.NavigationItem
+import com.example.wallpaperapp.user.User
 
 @Composable
 fun WallpapersCommonScreen(
@@ -50,8 +52,12 @@ fun WallpapersCommonScreen(
     vm: WallpapersScreenVM
 ) {
 
+    val homeUiState by vm.homeUiState.collectAsState()
+    val authState by vm.authState.collectAsState()
+
     val onClickAddBtn = {
-        val navItem = if (vm.userIsAnon) NavigationItem.PreAuth else NavigationItem.NewWallpaper
+        val navItem =
+            if (authState.isAuth) NavigationItem.NewWallpaper else NavigationItem.PreAuth
         navController.navigate(route = navItem.route)
     }
     val onClickWallPaper: (wallpaper: Wallpaper) -> Unit = {
@@ -62,8 +68,6 @@ fun WallpapersCommonScreen(
         vm.changeFav(it)
     }
     val onClickSignOut = { vm.signOut() }
-
-    val homeUiState by vm.homeUiState.collectAsState()
 
     Scaffold(
         floatingActionButton = {
@@ -77,7 +81,7 @@ fun WallpapersCommonScreen(
                 .padding(paddingValues)
                 .background(colorResource(id = R.color.white))
         ) {
-            Header(headerText, onClickSignOut)
+            Header(headerText, authState, onClickSignOut)
             SearchTextField()
             WallpapersLazyGrid(homeUiState.itemList, onClickWallPaper, onSetFav)
         }
@@ -98,31 +102,37 @@ fun AddWallpaperButton(onClickAddBtn: () -> Unit, modifier: Modifier = Modifier)
 }
 
 @Composable
-fun Header(text: String, signOutOnClick: () -> Unit) {
+fun Header(text: String, user: User, signOutOnClick: () -> Unit) {
 
+    Log.d("USER", user.id)
+    Spacer(modifier = Modifier.height(48.dp))
     Row(
-        modifier = Modifier.padding(start = 16.dp, top = 48.dp),
-        verticalAlignment = Alignment.Bottom
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.Bottom,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(
-            text = text,
-            fontSize = 24.sp,
-            fontFamily = FontFamily(Font(R.font.raleway_bold))
-        )
-        Image(
-            modifier = Modifier.size(width = 24.dp, height = 24.dp),
-            painter = painterResource(id = R.drawable.wallpaper_icon),
-            contentDescription = "place icon",
-            contentScale = ContentScale.FillWidth,
-        )
-        IconButton(
-            onClick = signOutOnClick
-        ) {
-            Icon(
-                imageVector = Icons.Filled.ExitToApp,
-                contentDescription = "sign out"
+        Row(verticalAlignment = Alignment.Bottom) {
+            Text(
+                text = text,
+                fontSize = 24.sp,
+                fontFamily = FontFamily(Font(R.font.raleway_bold))
+            )
+            Image(
+                modifier = Modifier.size(width = 24.dp, height = 24.dp),
+                painter = painterResource(id = R.drawable.wallpaper_icon),
+                contentDescription = "place icon",
+                contentScale = ContentScale.FillWidth,
             )
         }
+        if (user.isAuth)
+            IconButton(onClick = signOutOnClick) {
+                Icon(
+                    imageVector = Icons.Filled.ExitToApp,
+                    contentDescription = "sign out"
+                )
+            }
     }
 
 }
@@ -130,7 +140,7 @@ fun Header(text: String, signOutOnClick: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun HedaerPreview() {
-    Header(text = "Wallpaper", {})
+    Header(text = "Wallpaper", User(isAuth = true), {})
 }
 
 @Composable

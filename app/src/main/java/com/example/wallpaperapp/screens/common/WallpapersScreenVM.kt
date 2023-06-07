@@ -4,9 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.wallpaperapp.data.Wallpaper
 import com.example.wallpaperapp.data.WallpaperRepository
+import com.example.wallpaperapp.user.User
 import com.example.wallpaperapp.user.UserRepository
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -19,21 +18,44 @@ class WallpapersScreenVM(
     private val userRepo: UserRepository
 ) : ViewModel() {
 
-    val userId = Firebase.auth.currentUser?.uid ?: ""
-    val userIsAnon = Firebase.auth.currentUser?.isAnonymous ?: false
+    lateinit var authState: StateFlow<User>// =
+//        userRepo.getAuthState()
+//            .stateIn(
+//                scope = viewModelScope,
+//                started = SharingStarted.WhileSubscribed(5000L),
+//                initialValue = userRepo.getAppUser()//User(isAuth = false, id = "empty")
+//            )
 
-    val homeUiState: StateFlow<HomeUiState> =
-        wallpapersRepo.getWallpapers(sourceName, userId)
-            .map { HomeUiState(it) }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000L),
-                initialValue = HomeUiState()
-            )
+    lateinit var homeUiState: StateFlow<HomeUiState>// =
+//        wallpapersRepo.getWallpapers(sourceName, userRepo.getAppUser().id)
+//            .map { HomeUiState(itemList = it) }
+//            .stateIn(
+//                scope = viewModelScope,
+//                started = SharingStarted.WhileSubscribed(5000L),
+//                initialValue = HomeUiState()
+//            )
+
+    init {
+        viewModelScope.launch {
+            authState = userRepo.getAuthState()
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(5000L),
+                    initialValue = userRepo.getAppUser()
+                )
+            homeUiState = wallpapersRepo.getWallpapers(sourceName, authState.value.id)
+                .map { HomeUiState(itemList = it) }
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(5000L),
+                    initialValue = HomeUiState()
+                )
+        }
+    }
 
     fun changeFav(wallpaper: Wallpaper) {
         viewModelScope.launch {
-            wallpapersRepo.changeFavourite(wallpaper, userId)
+            wallpapersRepo.changeFavourite(wallpaper, authState.value.id)
         }
     }
 
@@ -43,6 +65,6 @@ class WallpapersScreenVM(
         }
     }
 
-    data class HomeUiState(val itemList: List<Wallpaper> = listOf(), val isLoading: Boolean = false)
+    data class HomeUiState(val itemList: List<Wallpaper> = listOf())
 
 }
