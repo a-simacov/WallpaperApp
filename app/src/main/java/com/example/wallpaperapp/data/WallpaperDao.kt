@@ -15,6 +15,6 @@ interface Dao {
     suspend fun deleteWallpaper(wallpaper: Wallpaper)
 
     @Query("SELECT * FROM wallpapers")
-    fun getWallpapers(): Flow<List<Wallpaper>>
+    suspend fun getWallpapers(): List<Wallpaper>
 
 }

@@ -6,12 +6,12 @@ import com.example.wallpaperapp.data.Wallpaper
 import com.example.wallpaperapp.data.WallpaperRepository
 import com.example.wallpaperapp.user.User
 import com.example.wallpaperapp.user.UserRepository
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 class WallpapersScreenVM(
@@ -20,28 +20,23 @@ class WallpapersScreenVM(
     private val userRepo: UserRepository
 ) : ViewModel() {
 
-    lateinit var authState: StateFlow<User> //=
-    lateinit var homeUiState: StateFlow<HomeUiState>// =
+    lateinit var authState: MutableStateFlow<User>
+    val homeUiState: MutableStateFlow<HomeUiState> = MutableStateFlow(HomeUiState())
 
     init {
-
         viewModelScope.launch {
-            val initAuthState = userRepo.getAppUser()
-            authState = userRepo.getAuthState()
-                .flowOn(Dispatchers.IO)
-                .stateIn(
-                    scope = viewModelScope,
-                    started = SharingStarted.WhileSubscribed(5000L),
-                    initialValue = initAuthState
-                )
+            authState = MutableStateFlow(userRepo.getAppUser())
+            val auth = Firebase.auth
+            val authStateListener = FirebaseAuth.AuthStateListener {
+                CoroutineScope(Dispatchers.IO).launch {
+                    authState.emit(userRepo.getAppUser())
+                }
+            }
+            auth.addAuthStateListener(authStateListener)
             authState.collect { user ->
-                homeUiState = wallpapersRepo.getWallpapers(sourceName, user.id)
-                    .map { HomeUiState(itemList = it) }
-                    .stateIn(
-                        scope = viewModelScope,
-                        started = SharingStarted.WhileSubscribed(5000L),
-                        initialValue = HomeUiState()
-                    )
+                homeUiState.emit(
+                    HomeUiState(itemList = wallpapersRepo.getWallpapers(sourceName, user.id))
+                )
             }
         }
     }
