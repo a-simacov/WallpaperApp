@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 class WallpapersScreenVM(
-    sourceName: String,
+    private val sourceName: String,
     private val wallpapersRepo: WallpaperRepository,
     private val userRepo: UserRepository
 ) : ViewModel() {
@@ -50,6 +50,14 @@ class WallpapersScreenVM(
     fun signOut() {
         viewModelScope.launch {
             userRepo.signOut()
+        }
+    }
+
+    fun updateWallpapers() {
+        viewModelScope.launch {
+            homeUiState.emit(
+                HomeUiState(itemList = wallpapersRepo.getWallpapers(sourceName, authState.value.id))
+            )
         }
     }
 

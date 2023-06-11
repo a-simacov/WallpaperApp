@@ -69,6 +69,8 @@ fun WallpapersCommonScreen(
     }
     val onClickSignOut = { vm.signOut() }
 
+    vm.updateWallpapers()
+
     Scaffold(
         floatingActionButton = {
             if (showAddButton)
